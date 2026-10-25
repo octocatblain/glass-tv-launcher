@@ -28,7 +28,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         web = WebView(this).apply {
-            setBackgroundColor(0xFF060A17.toInt())
+            setBackgroundColor(0xFF0E1118.toInt())
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
             isFocusable = true
             isFocusableInTouchMode = true
