@@ -8,10 +8,6 @@
 </head>
 <body>
 <div id="stage">
-  <div class="orb o1"></div>
-  <div class="orb o2"></div>
-  <div class="orb o3"></div>
-
   <!-- ============================== HOME ============================== -->
   <section id="home" class="screen active">
     <!-- One row: what's playing in Spotify, Netflix and YouTube (filled by app.js) -->
@@ -19,20 +15,10 @@
 
     <header class="top">
       <div class="clock"><span id="clock-time">9:41</span><span id="clock-date">Tue, Oct 24</span></div>
-      <div class="header-center">
+      <div class="top-right">
         <button class="search-btn glass" data-f data-action="voiceSearch" aria-label="Voice Search">
           <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"></path><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"></path></svg>
           <span>Search</span>
-        </button>
-        <nav class="pills glass" aria-label="Main">
-          <button class="pill on" data-f data-action="screen" data-to="home">Home</button>
-          <button class="pill" data-f data-action="screen" data-to="apps">All apps</button>
-        </nav>
-      </div>
-      <div class="top-right">
-        <button id="np-chip" class="chip-btn glass" data-f data-action="screen" data-to="now" hidden>
-          <span class="eq-bars"><i></i><i></i><i></i></span>
-          <span id="np-chip-text">Now playing</span>
         </button>
         <button class="round glass" data-f data-action="screen" data-to="settings" aria-label="Settings">
           <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"></path></svg>
@@ -41,9 +27,8 @@
     </header>
 
     <div class="hero">
-      <span class="eyebrow" id="hero-eyebrow">Good evening</span>
-      <h1 id="hero-title">Welcome home</h1>
-      <p id="hero-desc">Select an app below to launch immediately.</p>
+      <h1 id="greeting">Good evening</h1>
+      <p>Pick up where you left off.</p>
     </div>
 
     <div class="sec">
@@ -134,11 +119,6 @@
           <h3>Launcher</h3>
           <span>Options for this home screen.</span>
         </div>
-
-        <button class="srow" data-f data-action="accent">
-          <span class="st"><span class="sl">Accent color</span><span class="sd">Progress bars, toggles and highlights</span></span>
-          <span class="dots" id="accent-dots"></span>
-        </button>
 
         <button class="srow" data-f data-action="scale">
           <span class="st"><span class="sl">Screen size</span><span class="sd">Zoom the whole launcher if it looks too big or too small</span></span>
