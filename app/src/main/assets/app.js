@@ -231,8 +231,10 @@
     if (best) focusEl(best);
   }
 
+  let userMoved = false;
   addEventListener('keydown', (e) => {
-    const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+    userMoved = true;
+    const map ={ ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
     if (map[e.key]) { e.preventDefault(); move(map[e.key]); }
     else if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack') { e.preventDefault(); onBack(); }
     else if (e.key === 'ContextMenu' || e.key === 'F2') { e.preventDefault(); menuForFocused(); }
@@ -343,7 +345,11 @@
     }
 
     // Rebuilding the lists drops focus; put it back on the same app if possible.
-    if (!document.activeElement || !document.activeElement.isConnected || document.activeElement === document.body) {
+    // Until the user presses a key, start on the first favorite app instead of the header.
+    const idle = !userMoved && screen === 'home' && !sheetOpen();
+    if (idle) {
+      focusEl($('[data-default]', $('#home')));
+    } else if (!document.activeElement || !document.activeElement.isConnected || document.activeElement === document.body) {
       const scope = $('.screen.active');
       const same = keepPkg && $$('[data-pkg="' + keepPkg + '"]', scope).find(visible);
       focusEl(same || $('[data-default]', scope) || $$('[data-f]', scope).find(visible));

@@ -74,78 +74,77 @@
 44-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:36:9-33
 45        android:supportsRtl="true"
 45-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:37:9-35
-46        android:testOnly="true"
-47        android:theme="@style/Theme.GlassTV"
-47-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:38:9-45
-48        android:usesCleartextTraffic="true" >
-48-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:39:9-44
-49        <activity
-49-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:41:9-62:20
-50            android:name="com.glasstv.launcher.MainActivity"
-50-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:42:13-41
-51            android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation|uiMode|density|smallestScreenSize|screenLayout"
-51-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:43:13-141
-52            android:exported="true"
-52-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:44:13-36
-53            android:launchMode="singleInstance"
-53-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:45:13-48
-54            android:screenOrientation="landscape"
-54-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:46:13-50
-55            android:stateNotNeeded="true" >
-55-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:47:13-42
-56
-57            <!-- Shows up in the TV app list so it can be opened and selected. -->
-58            <intent-filter>
-58-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:50:13-54:29
-59                <action android:name="android.intent.action.MAIN" />
-59-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:21:13-65
-59-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:21:21-62
-60
-61                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-61-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:22:13-82
-61-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:22:23-79
-62                <category android:name="android.intent.category.DEFAULT" />
-62-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:53:17-76
-62-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:53:27-73
-63            </intent-filter>
-64
-65            <!-- Makes it a home screen candidate: the Home button asks which launcher to use. -->
-66            <intent-filter>
-66-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:57:13-61:29
-67                <action android:name="android.intent.action.MAIN" />
-67-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:21:13-65
-67-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:21:21-62
-68
-69                <category android:name="android.intent.category.HOME" />
-69-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:59:17-73
-69-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:59:27-70
-70                <category android:name="android.intent.category.DEFAULT" />
-70-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:53:17-76
-70-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:53:27-73
-71            </intent-filter>
-72        </activity>
-73
-74        <!--
-75             Needed only so the Now Playing screen can read active media sessions.
-76             Does nothing else; the user must grant Notification access.
-77        -->
-78        <service
-78-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:66:9-74:19
-79            android:name="com.glasstv.launcher.MediaListener"
-79-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:67:13-42
-80            android:exported="true"
-80-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:68:13-36
-81            android:label="@string/app_name"
-81-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:69:13-45
-82            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" >
-82-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:70:13-87
-83            <intent-filter>
-83-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:71:13-73:29
-84                <action android:name="android.service.notification.NotificationListenerService" />
-84-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:72:17-99
-84-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:72:25-96
-85            </intent-filter>
-86        </service>
-87    </application>
-88
-89</manifest>
+46        android:theme="@style/Theme.GlassTV"
+46-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:38:9-45
+47        android:usesCleartextTraffic="true" >
+47-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:39:9-44
+48        <activity
+48-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:41:9-62:20
+49            android:name="com.glasstv.launcher.MainActivity"
+49-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:42:13-41
+50            android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation|uiMode|density|smallestScreenSize|screenLayout"
+50-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:43:13-141
+51            android:exported="true"
+51-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:44:13-36
+52            android:launchMode="singleInstance"
+52-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:45:13-48
+53            android:screenOrientation="landscape"
+53-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:46:13-50
+54            android:stateNotNeeded="true" >
+54-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:47:13-42
+55
+56            <!-- Shows up in the TV app list so it can be opened and selected. -->
+57            <intent-filter>
+57-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:50:13-54:29
+58                <action android:name="android.intent.action.MAIN" />
+58-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:21:13-65
+58-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:21:21-62
+59
+60                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+60-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:22:13-82
+60-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:22:23-79
+61                <category android:name="android.intent.category.DEFAULT" />
+61-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:53:17-76
+61-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:53:27-73
+62            </intent-filter>
+63
+64            <!-- Makes it a home screen candidate: the Home button asks which launcher to use. -->
+65            <intent-filter>
+65-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:57:13-61:29
+66                <action android:name="android.intent.action.MAIN" />
+66-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:21:13-65
+66-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:21:21-62
+67
+68                <category android:name="android.intent.category.HOME" />
+68-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:59:17-73
+68-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:59:27-70
+69                <category android:name="android.intent.category.DEFAULT" />
+69-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:53:17-76
+69-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:53:27-73
+70            </intent-filter>
+71        </activity>
+72
+73        <!--
+74             Needed only so the Now Playing screen can read active media sessions.
+75             Does nothing else; the user must grant Notification access.
+76        -->
+77        <service
+77-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:66:9-74:19
+78            android:name="com.glasstv.launcher.MediaListener"
+78-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:67:13-42
+79            android:exported="true"
+79-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:68:13-36
+80            android:label="@string/app_name"
+80-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:69:13-45
+81            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" >
+81-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:70:13-87
+82            <intent-filter>
+82-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:71:13-73:29
+83                <action android:name="android.service.notification.NotificationListenerService" />
+83-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:72:17-99
+83-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:72:25-96
+84            </intent-filter>
+85        </service>
+86    </application>
+87
+88</manifest>

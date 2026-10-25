@@ -13,7 +13,6 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
-import android.os.SystemClock
 import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.util.Base64
@@ -206,37 +205,6 @@ class LauncherBridge(private val activity: MainActivity) {
     @JavascriptInterface
     fun hasNotificationAccess(): Boolean = hasAccess()
 
-    @JavascriptInterface
-    fun nowPlaying(): String {
-        val o = JSONObject()
-        o.put("access", hasAccess())
-        val mc = controller()
-        if (mc == null) {
-            o.put("active", false)
-            return o.toString()
-        }
-        val md = mc.metadata
-        val ps = mc.playbackState
-        val title = md?.getString(MediaMetadata.METADATA_KEY_TITLE)
-            ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE) ?: ""
-        val subtitle = md?.getString(MediaMetadata.METADATA_KEY_ARTIST)
-            ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE)
-            ?: md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
-        val duration = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L
-        val playing = ps?.state == PlaybackState.STATE_PLAYING || ps?.state == PlaybackState.STATE_BUFFERING
-
-        o.put("active", title.isNotEmpty() || ps != null)
-        o.put("title", title.ifEmpty { "Playing" })
-        o.put("subtitle", subtitle)
-        o.put("pkg", mc.packageName)
-        o.put("app", appLabel(mc.packageName))
-        o.put("state", if (playing) "playing" else "paused")
-        o.put("position", position(ps, duration))
-        o.put("duration", duration)
-        o.put("artKey", mc.packageName + "|" + title)
-        return o.toString()
-    }
-
     /** Every active media session (Spotify, Netflix, YouTube, ...) for the home screen cards. */
     @JavascriptInterface
     fun nowPlayingAll(): String {
@@ -279,38 +247,6 @@ class LauncherBridge(private val activity: MainActivity) {
         return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
     }
 
-    /** Cover art as a base64 JPEG; the page asks for it only when the track changes. */
-    @JavascriptInterface
-    fun nowPlayingArt(): String {
-        val md = controller()?.metadata ?: return ""
-        val bmp = md.getBitmap(MediaMetadata.METADATA_KEY_ART)
-            ?: md.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
-            ?: md.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
-            ?: return ""
-        val scaled = if (bmp.width > 960) {
-            Bitmap.createScaledBitmap(bmp, 960, (bmp.height * 960f / bmp.width).toInt().coerceAtLeast(1), true)
-        } else bmp
-        val out = ByteArrayOutputStream()
-        scaled.compress(Bitmap.CompressFormat.JPEG, 80, out)
-        return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
-    }
-
-    @JavascriptInterface
-    fun mediaControl(cmd: String) {
-        val mc = controller() ?: return
-        val t = mc.transportControls
-        val ps = mc.playbackState
-        val dur = mc.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L
-        val pos = position(ps, dur)
-        when (cmd) {
-            "toggle" -> if (ps?.state == PlaybackState.STATE_PLAYING) t.pause() else t.play()
-            "next" -> t.skipToNext()
-            "prev" -> t.skipToPrevious()
-            "rew" -> t.seekTo((pos - 10_000).coerceAtLeast(0))
-            "ff" -> t.seekTo(if (dur > 0) (pos + 10_000).coerceAtMost(dur) else pos + 10_000)
-        }
-    }
-
     // ---- helpers ------------------------------------------------------------------------
 
     private fun hasAccess(): Boolean {
@@ -326,28 +262,6 @@ class LauncherBridge(private val activity: MainActivity) {
         } catch (_: SecurityException) {
             emptyList()
         }
-    }
-
-    private fun controller(): MediaController? {
-        val sessions = sessions()
-        return sessions.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
-            ?: sessions.firstOrNull()
-    }
-
-    private fun position(ps: PlaybackState?, duration: Long): Long {
-        if (ps == null) return 0L
-        var pos = ps.position
-        if (ps.state == PlaybackState.STATE_PLAYING) {
-            val dt = SystemClock.elapsedRealtime() - ps.lastPositionUpdateTime
-            pos += (dt * ps.playbackSpeed).toLong()
-        }
-        return if (duration > 0) pos.coerceIn(0, duration) else pos.coerceAtLeast(0)
-    }
-
-    private fun appLabel(pkg: String): String = try {
-        pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString()
-    } catch (_: Exception) {
-        pkg
     }
 
     private fun encodePng(d: Drawable, size: Int): String {
