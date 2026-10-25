@@ -8,6 +8,10 @@
 </head>
 <body>
 <div id="stage">
+  <!-- soft colour glows: the frosted glass surfaces blur these -->
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
   <!-- ============================== HOME ============================== -->
   <section id="home" class="screen active">
     <!-- One row: what's playing in Spotify, Netflix and YouTube (filled by app.js) -->
@@ -52,6 +56,21 @@
       <span class="clock-r" data-clock></span>
     </header>
     <div class="grid-wrap"><div class="grid" id="apps-grid"></div></div>
+  </section>
+
+  <!-- ============================== MANAGE FAVORITES ============================== -->
+  <section id="favs" class="screen">
+    <header class="sub-top">
+      <div class="sub-left">
+        <button class="round big glass" data-f data-action="back" aria-label="Back to home">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <h2>Favorite apps</h2>
+        <span class="sub-hint" id="favs-hint">OK adds or removes an app</span>
+      </div>
+      <button class="srow-btn glass" data-f data-action="favReset">Reset to default</button>
+    </header>
+    <div class="grid-wrap"><div class="grid" id="favs-grid"></div></div>
   </section>
 
   <!-- ============================== PRE-INSTALLED (BLOATWARE) ============================== -->
@@ -130,9 +149,19 @@
           <span class="sv" id="margin-val">Off</span>
         </button>
 
+        <button class="srow" data-f data-action="toggle" data-key="glass" aria-pressed="true">
+          <span class="st"><span class="sl">Glass effects</span><span class="sd">Frosted blur on cards and panels. Turn off if the launcher feels slow</span></span>
+          <span class="switch"><i></i></span>
+        </button>
+
         <button class="srow" data-f data-action="toggle" data-key="clock24" aria-pressed="false">
           <span class="st"><span class="sl">24-hour clock</span><span class="sd">Show time as 21:41 instead of 9:41 PM</span></span>
           <span class="switch"><i></i></span>
+        </button>
+
+        <button class="srow" data-f data-action="screen" data-to="favs">
+          <span class="st"><span class="sl">Manage favorites</span><span class="sd">Choose which apps appear on the home row</span></span>
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
         </button>
 
         <button class="srow" data-f data-action="screen" data-to="bloat">
@@ -161,6 +190,9 @@
         <div class="st"><span class="sl" id="sheet-name">App</span><span class="sd" id="sheet-kind"></span></div>
       </div>
       <button class="srow" data-f data-action="sheetOpen"><span class="sl">Open</span></button>
+      <button class="srow" data-f data-action="sheetFav"><span class="sl" id="sheet-fav">Add to favorites</span></button>
+      <button class="srow" data-f data-action="sheetMoveL" id="sheet-ml"><span class="sl">Move left</span></button>
+      <button class="srow" data-f data-action="sheetMoveR" id="sheet-mr"><span class="sl">Move right</span></button>
       <button class="srow danger" data-f data-action="sheetRemove"><span class="sl" id="sheet-remove">Uninstall</span></button>
       <button class="srow" data-f data-action="sheetInfo"><span class="sl">App info</span></button>
       <button class="srow" data-f data-action="sheetClose"><span class="sl">Cancel</span></button>

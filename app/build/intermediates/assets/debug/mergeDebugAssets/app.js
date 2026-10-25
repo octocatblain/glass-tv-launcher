@@ -45,7 +45,7 @@
    * ------------------------------------------------------------------------- */
   const SCALES = [80, 85, 90, 95, 100, 105, 110];
   const MARGINS = [0, 2, 3, 4, 5];
-  const defaults = { clock24: false, scale: 100, margin: 0 };
+  const defaults = { clock24: false, scale: 100, margin: 0, favs: null, glass: true };
   let S = Object.assign({}, defaults);
   try { Object.assign(S, JSON.parse(localStorage.getItem('glass.settings') || '{}')); } catch (e) { /* first run */ }
   const save = () => { try { localStorage.setItem('glass.settings', JSON.stringify(S)); } catch (e) { /* ignore */ } };
@@ -73,6 +73,7 @@
   function applySettings() {
     $('#scale-val').textContent = S.scale + '%';
     $('#margin-val').textContent = S.margin ? S.margin + '%' : 'Off';
+    document.body.classList.toggle('flat', !S.glass);
     $$('[data-action="toggle"]').forEach((b) => b.setAttribute('aria-pressed', String(!!S[b.dataset.key])));
     fit();
     tick();
@@ -171,6 +172,12 @@
     }
     $('#sheet-name').textContent = app.label;
     $('#sheet-kind').textContent = app.system ? 'Pre-installed app' : 'Installed app';
+    const favs = favList();
+    const idx = favs.indexOf(pkg);
+    $('#sheet-fav').textContent = idx >= 0 ? 'Remove from favorites' : 'Add to favorites';
+    // Reordering only makes sense for an app that is on the home row.
+    $('#sheet-ml').hidden = idx <= 0;
+    $('#sheet-mr').hidden = idx < 0 || idx >= favs.length - 1;
     $('#sheet-remove').textContent = app.system ? 'Disable / remove' : 'Uninstall';
     $('#sheet-note').textContent = !app.system ? ''
       : isProtected(pkg)
@@ -258,6 +265,23 @@
     const d = b.dataset;
     switch (d.action) {
       case 'manage': openSheet(d.pkg); break;
+      case 'fav': {
+        // Re-rendering rebuilds the grid, so remember the app and put focus back on it.
+        const p = d.pkg;
+        toggleFav(p);
+        focusEl($$('[data-pkg="' + p + '"]', $('#favs-grid'))[0]);
+        break;
+      }
+      case 'favReset': S.favs = null; save(); renderApps(); showToast('Favorites reset'); break;
+      case 'sheetFav': { const p = sheetPkg; closeSheet(); if (p) toggleFav(p); break; }
+      case 'sheetMoveL':
+      case 'sheetMoveR': {
+        const p = sheetPkg;
+        moveFav(p, d.action === 'sheetMoveL' ? -1 : 1);
+        closeSheet();
+        focusEl($$('[data-pkg="' + p + '"]', $('#apps-row'))[0]);
+        break;
+      }
       case 'sheetClose': closeSheet(); break;
       case 'sheetOpen': { const p = sheetPkg; closeSheet(); if (p) Native.launch(p); break; }
       case 'sheetInfo': if (sheetPkg) Native.appInfo(sheetPkg); break;
@@ -314,12 +338,51 @@
     return b;
   }
 
+  /* Favorites: the user's own list (S.favs) once they edit it, else config.js pinned apps first. */
+  const MAX_FAVS = 10;
+  function defaultFavs() {
+    const byLabel = APPS.slice().sort((x, y) => x.label.localeCompare(y.label));
+    const pinned = (C.pinned || []).map((p) => APPS.find((a) => a.pkg === p)).filter(Boolean);
+    return pinned.concat(byLabel.filter((a) => !pinned.includes(a))).slice(0, C.homeRowCount || 5).map((a) => a.pkg);
+  }
+  // Installed apps only: an uninstalled favorite quietly drops out (and returns if reinstalled).
+  const favList = () => (S.favs || defaultFavs()).filter((p) => APPS.some((a) => a.pkg === p));
+  const isFav = (pkg) => favList().includes(pkg);
+
+  function setFavs(list) {
+    S.favs = list;
+    save();
+    renderApps();
+  }
+  function toggleFav(pkg) {
+    const cur = favList();
+    if (cur.includes(pkg)) return setFavs(cur.filter((p) => p !== pkg));
+    if (cur.length >= MAX_FAVS) { showToast('Up to ' + MAX_FAVS + ' favorites. Remove one first.'); return; }
+    setFavs(cur.concat(pkg));
+  }
+  function moveFav(pkg, dir) {
+    const cur = favList();
+    const i = cur.indexOf(pkg);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= cur.length) return;
+    [cur[i], cur[j]] = [cur[j], cur[i]];
+    setFavs(cur);
+  }
+
   function renderApps() {
     const keepPkg = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.pkg : null;
     const byLabel = APPS.slice().sort((x, y) => x.label.localeCompare(y.label));
-    const pinned = (C.pinned || []).map((p) => APPS.find((a) => a.pkg === p)).filter(Boolean);
-    const rest = byLabel.filter((a) => !pinned.includes(a));
-    const home = pinned.concat(rest).slice(0, C.homeRowCount || 5);
+    const favs = favList();
+    const home = favs.map((p) => APPS.find((a) => a.pkg === p));
+
+    const fg = $('#favs-grid');
+    fg.innerHTML = '';
+    byLabel.forEach((a) => {
+      const t = appTile(a, 'fav');
+      t.classList.toggle('fav', favs.includes(a.pkg));
+      fg.appendChild(t);
+    });
+    $('#favs-hint').textContent = favs.length + ' of ' + MAX_FAVS + ' · OK adds or removes an app';
 
     const row = $('#apps-row');
     row.innerHTML = '';
@@ -375,12 +438,29 @@
   const artCache = {};
   const mediaCards = {};
 
+  // The last track/video seen in each app. Android only exposes what is currently active, so the
+  // launcher remembers it and keeps showing it after the app's media session has gone away.
+  let last = {};
+  try { last = JSON.parse(localStorage.getItem('glass.last') || '{}') || {}; } catch (e) { last = {}; }
+  const saveLast = () => { try { localStorage.setItem('glass.last', JSON.stringify(last)); } catch (e) { /* storage full or blocked */ } };
+
   function pollSessions() {
     try { sessions = JSON.parse(Native.nowPlayingAll()); } catch (e) { sessions = []; }
     sessions.forEach((s) => {
       if (artCache[s.pkg] && artCache[s.pkg].key === s.artKey) return;
       artCache[s.pkg] = { key: s.artKey, art: Native.artFor(s.pkg) };
     });
+    let changed = false;
+    MEDIA_BRANDS.forEach((m) => {
+      const ses = sessions.find((s) => s.pkg.toLowerCase().includes(m.key));
+      if (!ses || !ses.title) return;
+      const prev = last[m.key] || {};
+      const art = (artCache[ses.pkg] && artCache[ses.pkg].art) || (prev.title === ses.title ? prev.art : '') || '';
+      if (prev.title === ses.title && prev.subtitle === (ses.subtitle || '') && prev.art === art) return;
+      last[m.key] = { title: ses.title, subtitle: ses.subtitle || '', art };
+      changed = true;
+    });
+    if (changed) saveLast();
     renderMedia();
   }
 
@@ -398,8 +478,9 @@
         card.setAttribute('data-f', '');
         card.dataset.action = 'launch';
         card.dataset.brand = m.key;
-        card.innerHTML = '<img class="m-ico" alt=""><span class="m-state"></span>' +
-          '<span class="m-app"></span><span class="m-title"></span><span class="m-sub"></span>';
+        card.innerHTML = '<span class="m-top"><span class="m-ico"></span><span class="m-app"></span>' +
+          '<span class="m-state"><span class="m-eq"><i></i><i></i><i></i></span><b></b></span></span>' +
+          '<span class="m-body"><span class="m-title"></span><span class="m-sub"></span></span>';
         mediaCards[m.key] = card;
       }
       // Keep a stable order: Spotify, Netflix, YouTube.
@@ -409,21 +490,30 @@
       card.dataset.pkg = (ses && ses.pkg) || app.pkg;
       card.dataset.label = m.name;
       const ico = $('.m-ico', card);
-      const src = app && app.icon ? 'data:image/png;base64,' + app.icon : '';
-      if (src && ico.getAttribute('src') !== src) ico.src = src;
-      ico.hidden = !src;
+      const src = app && app.icon ? 'url("data:image/png;base64,' + app.icon + '")' : '';
+      if (ico.style.backgroundImage !== src) ico.style.backgroundImage = src;
+      ico.textContent = src ? '' : m.name.charAt(0);
       $('.m-app', card).textContent = m.name;
-      const art = ses && artCache[ses.pkg] ? artCache[ses.pkg].art : '';
-      card.style.backgroundImage = art ? 'url("data:image/jpeg;base64,' + art + '")' : '';
-      card.classList.toggle('idle', !ses);
+      // Live session wins; otherwise fall back to the last thing played in that app.
+      const rec = !ses ? last[m.key] : null;
+      const art = ses ? (artCache[ses.pkg] ? artCache[ses.pkg].art : '') : (rec ? rec.art : '');
+      const bg = art ? 'url("data:image/jpeg;base64,' + art + '")' : '';
+      if (card.style.backgroundImage !== bg) card.style.backgroundImage = bg;
+      card.classList.toggle('idle', !ses && !rec);
+      card.classList.toggle('recent', !!rec);
+      card.classList.toggle('is-playing', !!ses && ses.state === 'playing');
+      $('.m-state', card).hidden = !ses && !rec;
       if (ses) {
-        $('.m-state', card).textContent = ses.state === 'playing' ? 'Playing' : 'Paused';
+        $('.m-state b', card).textContent = ses.state === 'playing' ? 'Playing' : 'Paused';
         $('.m-title', card).textContent = ses.title || 'Playing';
         $('.m-sub', card).textContent = ses.subtitle || '';
+      } else if (rec) {
+        $('.m-state b', card).textContent = 'Recent';
+        $('.m-title', card).textContent = rec.title;
+        $('.m-sub', card).textContent = rec.subtitle || 'Press OK to open';
       } else {
-        $('.m-state', card).textContent = '';
-        $('.m-title', card).textContent = hasAccess ? 'Nothing playing' : 'Open ' + m.name;
-        $('.m-sub', card).textContent = hasAccess ? 'Open ' + m.name : 'Allow Now playing access in Settings';
+        $('.m-title', card).textContent = hasAccess ? 'Nothing played yet' : 'Not connected';
+        $('.m-sub', card).textContent = hasAccess ? 'Press OK to open' : 'Allow Now playing access in Settings';
       }
     });
     row.classList.toggle('empty', !row.children.length);

@@ -45,7 +45,7 @@
    * ------------------------------------------------------------------------- */
   const SCALES = [80, 85, 90, 95, 100, 105, 110];
   const MARGINS = [0, 2, 3, 4, 5];
-  const defaults = { clock24: false, scale: 100, margin: 0, favs: null };
+  const defaults = { clock24: false, scale: 100, margin: 0, favs: null, glass: true };
   let S = Object.assign({}, defaults);
   try { Object.assign(S, JSON.parse(localStorage.getItem('glass.settings') || '{}')); } catch (e) { /* first run */ }
   const save = () => { try { localStorage.setItem('glass.settings', JSON.stringify(S)); } catch (e) { /* ignore */ } };
@@ -73,6 +73,7 @@
   function applySettings() {
     $('#scale-val').textContent = S.scale + '%';
     $('#margin-val').textContent = S.margin ? S.margin + '%' : 'Off';
+    document.body.classList.toggle('flat', !S.glass);
     $$('[data-action="toggle"]').forEach((b) => b.setAttribute('aria-pressed', String(!!S[b.dataset.key])));
     fit();
     tick();
@@ -437,12 +438,29 @@
   const artCache = {};
   const mediaCards = {};
 
+  // The last track/video seen in each app. Android only exposes what is currently active, so the
+  // launcher remembers it and keeps showing it after the app's media session has gone away.
+  let last = {};
+  try { last = JSON.parse(localStorage.getItem('glass.last') || '{}') || {}; } catch (e) { last = {}; }
+  const saveLast = () => { try { localStorage.setItem('glass.last', JSON.stringify(last)); } catch (e) { /* storage full or blocked */ } };
+
   function pollSessions() {
     try { sessions = JSON.parse(Native.nowPlayingAll()); } catch (e) { sessions = []; }
     sessions.forEach((s) => {
       if (artCache[s.pkg] && artCache[s.pkg].key === s.artKey) return;
       artCache[s.pkg] = { key: s.artKey, art: Native.artFor(s.pkg) };
     });
+    let changed = false;
+    MEDIA_BRANDS.forEach((m) => {
+      const ses = sessions.find((s) => s.pkg.toLowerCase().includes(m.key));
+      if (!ses || !ses.title) return;
+      const prev = last[m.key] || {};
+      const art = (artCache[ses.pkg] && artCache[ses.pkg].art) || (prev.title === ses.title ? prev.art : '') || '';
+      if (prev.title === ses.title && prev.subtitle === (ses.subtitle || '') && prev.art === art) return;
+      last[m.key] = { title: ses.title, subtitle: ses.subtitle || '', art };
+      changed = true;
+    });
+    if (changed) saveLast();
     renderMedia();
   }
 
@@ -476,17 +494,25 @@
       if (ico.style.backgroundImage !== src) ico.style.backgroundImage = src;
       ico.textContent = src ? '' : m.name.charAt(0);
       $('.m-app', card).textContent = m.name;
-      const art = ses && artCache[ses.pkg] ? artCache[ses.pkg].art : '';
-      card.style.backgroundImage = art ? 'url("data:image/jpeg;base64,' + art + '")' : '';
-      card.classList.toggle('idle', !ses);
+      // Live session wins; otherwise fall back to the last thing played in that app.
+      const rec = !ses ? last[m.key] : null;
+      const art = ses ? (artCache[ses.pkg] ? artCache[ses.pkg].art : '') : (rec ? rec.art : '');
+      const bg = art ? 'url("data:image/jpeg;base64,' + art + '")' : '';
+      if (card.style.backgroundImage !== bg) card.style.backgroundImage = bg;
+      card.classList.toggle('idle', !ses && !rec);
+      card.classList.toggle('recent', !!rec);
       card.classList.toggle('is-playing', !!ses && ses.state === 'playing');
-      $('.m-state', card).hidden = !ses;
+      $('.m-state', card).hidden = !ses && !rec;
       if (ses) {
         $('.m-state b', card).textContent = ses.state === 'playing' ? 'Playing' : 'Paused';
         $('.m-title', card).textContent = ses.title || 'Playing';
         $('.m-sub', card).textContent = ses.subtitle || '';
+      } else if (rec) {
+        $('.m-state b', card).textContent = 'Recent';
+        $('.m-title', card).textContent = rec.title;
+        $('.m-sub', card).textContent = rec.subtitle || 'Press OK to open';
       } else {
-        $('.m-title', card).textContent = hasAccess ? 'Nothing playing' : 'Not connected';
+        $('.m-title', card).textContent = hasAccess ? 'Nothing played yet' : 'Not connected';
         $('.m-sub', card).textContent = hasAccess ? 'Press OK to open' : 'Allow Now playing access in Settings';
       }
     });

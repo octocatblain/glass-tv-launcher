@@ -8,6 +8,10 @@
 </head>
 <body>
 <div id="stage">
+  <!-- soft colour glows: the frosted glass surfaces blur these -->
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
   <!-- ============================== HOME ============================== -->
   <section id="home" class="screen active">
     <!-- One row: what's playing in Spotify, Netflix and YouTube (filled by app.js) -->
@@ -143,6 +147,11 @@
         <button class="srow" data-f data-action="margin">
           <span class="st"><span class="sl">Screen edge margin</span><span class="sd">Pull content in if your TV crops the edges (overscan)</span></span>
           <span class="sv" id="margin-val">Off</span>
+        </button>
+
+        <button class="srow" data-f data-action="toggle" data-key="glass" aria-pressed="true">
+          <span class="st"><span class="sl">Glass effects</span><span class="sd">Frosted blur on cards and panels. Turn off if the launcher feels slow</span></span>
+          <span class="switch"><i></i></span>
         </button>
 
         <button class="srow" data-f data-action="toggle" data-key="clock24" aria-pressed="false">
