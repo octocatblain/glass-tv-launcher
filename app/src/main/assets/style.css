@@ -52,14 +52,15 @@ body.lite [data-f]:focus{background:rgba(64,76,120,.95)}
 @keyframes eq{0%{height:20%}100%{height:100%}}
 
 /* ---------- media cards (right of the greeting) ---------- */
-.media-row{position:absolute;right:96px;top:150px;width:900px;height:260px;display:flex;gap:20px;z-index:1}
-.mcard{flex:1;min-width:0;position:relative;overflow:hidden;border-radius:32px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:22px;text-align:left;background-size:cover;background-position:center}
+.media-row{position:absolute;right:96px;top:190px;width:900px;height:180px;display:flex;gap:20px;z-index:1}
+.mcard{flex:1;min-width:0;position:relative;overflow:hidden;border-radius:12px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:22px;text-align:left;background-size:cover;background-position:center}
 .mcard::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(5,8,18,.88),rgba(5,8,18,.25) 70%);pointer-events:none}
 .mcard>*{position:relative}
-.mcard .m-ico{position:absolute;left:22px;top:22px;width:64px;height:64px;border-radius:50%}
-.mcard .m-state{position:absolute;right:22px;top:22px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.mcard .m-ico{position:absolute;left:18px;top:16px;width:48px;height:48px;border-radius:50%}
+.mcard .m-state{position:absolute;right:18px;top:20px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
 .mcard .m-app{font-size:16px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.mcard .m-title{font-size:26px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mcard{padding:18px}
+.mcard .m-title{font-size:24px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mcard .m-sub{font-size:18px;color:rgba(255,255,255,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mcard[data-brand="spotify"]{background-color:#0d3b1f}
 .mcard[data-brand="netflix"]{background-color:#3d0a0d}
@@ -169,6 +170,16 @@ body.lite [data-f]:focus{background:rgba(64,76,120,.95)}
 .tbtn:focus{transform:scale(1.12)}
 #now[data-state="playing"] .i-play{display:none}
 #now[data-state="paused"] .i-pause{display:none}
+
+/* ---------- pre-installed apps + options sheet ---------- */
+.sub-hint{font-size:22px;color:var(--muted);margin-left:8px}
+.sheet-back{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(3,5,12,.7)}
+.sheet{width:720px;display:flex;flex-direction:column;gap:10px;padding:32px;border-radius:28px;background:rgba(28,36,64,.96)}
+.sheet-head{display:flex;align-items:center;gap:20px;padding:0 12px 14px}
+.sheet-head .ph,.sheet-head img{width:72px;height:72px;border-radius:50%}
+.sheet-head .sl{font-size:30px}
+.srow.danger .sl{color:#ff8a8a}
+.sheet-note{padding:10px 12px 0;line-height:1.4}
 
 /* ---------- toast ---------- */
 #toast{position:absolute;left:50%;bottom:48px;transform:translateX(-50%);max-width:1100px;padding:18px 32px;border-radius:999px;font-size:22px;font-weight:600;z-index:10}

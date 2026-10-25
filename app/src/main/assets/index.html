@@ -49,7 +49,7 @@
     <div class="sec">
       <div class="sec-head">
         <span class="sec-label">Favorite Apps</span>
-        <span class="sec-sub">Press OK on remote to launch</span>
+        <span class="sec-sub">OK to launch · hold OK or press Menu for options</span>
       </div>
       <div class="row" id="apps-row"></div>
     </div>
@@ -67,6 +67,21 @@
       <span class="clock-r" data-clock></span>
     </header>
     <div class="grid-wrap"><div class="grid" id="apps-grid"></div></div>
+  </section>
+
+  <!-- ============================== PRE-INSTALLED (BLOATWARE) ============================== -->
+  <section id="bloat" class="screen">
+    <header class="sub-top">
+      <div class="sub-left">
+        <button class="round big glass" data-f data-action="back" aria-label="Back to home">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <h2>Pre-installed apps</h2>
+        <span class="sub-hint">Select an app to disable or remove it</span>
+      </div>
+      <span class="clock-r" data-clock></span>
+    </header>
+    <div class="grid-wrap"><div class="grid" id="bloat-grid"></div></div>
   </section>
 
   <!-- ============================== SETTINGS ============================== -->
@@ -143,6 +158,11 @@
         <button class="srow" data-f data-action="toggle" data-key="lite" aria-pressed="false">
           <span class="st"><span class="sl">Reduce glass effects</span><span class="sd">Turn on if the interface feels slow</span></span>
           <span class="switch"><i></i></span>
+        </button>
+
+        <button class="srow" data-f data-action="screen" data-to="bloat">
+          <span class="st"><span class="sl">Remove bloatware</span><span class="sd">Disable or remove pre-installed apps you don't use</span></span>
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
         </button>
 
         <button class="srow" data-f data-action="access">
@@ -224,6 +244,21 @@
       </div>
     </div>
   </section>
+
+  <!-- App options sheet: opened with the remote's Menu button or by holding OK on an app -->
+  <div id="sheet" class="sheet-back" hidden>
+    <div class="sheet glass" role="dialog" aria-labelledby="sheet-name">
+      <div class="sheet-head">
+        <div class="ph" id="sheet-icon"></div>
+        <div class="st"><span class="sl" id="sheet-name">App</span><span class="sd" id="sheet-kind"></span></div>
+      </div>
+      <button class="srow" data-f data-action="sheetOpen"><span class="sl">Open</span></button>
+      <button class="srow danger" data-f data-action="sheetRemove"><span class="sl" id="sheet-remove">Uninstall</span></button>
+      <button class="srow" data-f data-action="sheetInfo"><span class="sl">App info</span></button>
+      <button class="srow" data-f data-action="sheetClose"><span class="sl">Cancel</span></button>
+      <span class="sd sheet-note" id="sheet-note"></span>
+    </div>
+  </div>
 
   <div id="toast" class="glass" hidden></div>
 </div>

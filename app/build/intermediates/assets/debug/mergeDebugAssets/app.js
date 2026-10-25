@@ -69,6 +69,13 @@
         });
       },
       nowPlayingArt() { return ''; },
+      nowPlayingAll() {
+        return JSON.stringify([
+          { pkg: 'com.spotify.tv.android', title: 'Blinding Lights', subtitle: 'The Weeknd', state: 'playing', artKey: 'a' },
+          { pkg: 'com.google.android.youtube.tv', title: 'Northern Lights 4K', subtitle: 'Nature Channel', state: 'paused', artKey: 'b' }
+        ]);
+      },
+      artFor() { return ''; },
       mediaControl(c) { toastMock('Media: ' + c); }
     };
   })();
@@ -183,70 +190,25 @@
   window.goHome = () => show('home');
   window.onVoiceSearch = () => Native.openVoiceSearch();
 
-  function updateHeroArt(tag, title, sub, iconHtml, bgStyle) {
-    const art = $('#hero-art');
-    if (!art) return;
-    if (bgStyle) art.style.background = bgStyle;
-    else art.style.background = 'linear-gradient(135deg, #1d4ed8 0%, #0f766e 50%, #7c3aed 100%)';
-
-    const t = $('#hero-art-tag');
-    const h = $('#hero-art-title');
-    const s = $('#hero-art-sub');
-    const i = $('#hero-art-icon');
-
-    if (t) t.textContent = tag;
-    if (h) h.textContent = title;
-    if (s) s.textContent = sub;
-    if (i) {
-      if (typeof iconHtml === 'string' && iconHtml.startsWith('data:image')) {
-        i.innerHTML = '<img src="' + iconHtml + '" alt="">';
-      } else if (iconHtml) {
-        i.innerHTML = iconHtml;
-      } else {
-        i.innerHTML = (title || '?').charAt(0).toUpperCase();
-      }
-    }
-  }
-
-  /* Dynamic hero banner update on focus */
+  /* Keep the greeting text in step with the focused tile. */
   document.addEventListener('focusin', (e) => {
     const target = e.target;
-    if (!target) return;
-    if (screen === 'home' && target.dataset && target.dataset.action === 'launch') {
+    if (!target || screen !== 'home' || !target.dataset) return;
+    if (target.dataset.action === 'launch') {
       const name = target.dataset.label || 'App';
-      const brand = target.dataset.brand;
-      const info = BRAND_INFO[brand];
-      const pkg = target.dataset.pkg;
-      const app = APPS.find((a) => a.pkg === pkg);
-      const iconSrc = app && app.icon ? 'data:image/png;base64,' + app.icon : null;
-
+      const info = BRAND_INFO[target.dataset.brand];
       $('#hero-eyebrow').textContent = 'LAUNCH APP';
       $('#hero-title').textContent = name;
       $('#hero-desc').textContent = info ? info.sub : 'Press OK on remote to open ' + name + '.';
-
-      updateHeroArt(
-        info ? info.tag : 'FEATURED APP',
-        name,
-        info ? info.sub : 'Installed Application',
-        iconSrc || (info ? info.ph : name.charAt(0)),
-        info ? info.bg : null
-      );
-    } else if (screen === 'home' && target.dataset && target.dataset.action === 'screen' && target.dataset.to === 'apps') {
+    } else if (target.dataset.action === 'screen' && target.dataset.to === 'apps') {
       $('#hero-eyebrow').textContent = 'ALL APPLICATIONS';
       $('#hero-title').textContent = 'All Apps';
       $('#hero-desc').textContent = 'Browse every installed application on your TV.';
-      updateHeroArt('ALL APPS', 'App Library', 'Browse all installed applications', '📱', 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)');
-    } else if (screen === 'home' && !target.closest('.row')) {
-      const d = new Date();
-      const h = d.getHours();
+    } else if (!target.closest('.row') && !target.closest('#media-row')) {
+      const h = new Date().getHours();
       $('#hero-eyebrow').textContent = h < 12 ? 'GOOD MORNING' : h < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
       $('#hero-title').textContent = 'Welcome home';
       $('#hero-desc').textContent = 'Select an app below to launch immediately.';
-      if (np && np.access && np.active) {
-        updateHeroArt('NOW PLAYING', np.title, np.subtitle || np.app || 'Active Session', '🎵', 'linear-gradient(135deg, #1e1b4b 0%, #31103f 100%)');
-      } else {
-        updateHeroArt('GLASS LAUNCHER', 'Quick Launch', (APPS.length || 5) + ' installed apps ready', '⚡', 'linear-gradient(135deg, #1d4ed8 0%, #0f766e 50%, #7c3aed 100%)');
-      }
     }
   });
 
@@ -409,7 +371,76 @@
   window.onApps = (json) => {
     try { APPS = JSON.parse(json); } catch (e) { APPS = []; }
     renderApps();
+    renderMedia();
   };
+
+  /* ---------------------------------------------------------------------------
+   * Media cards: one row showing what is playing in Spotify, Netflix and YouTube.
+   * Android only exposes the item that is currently playing or paused in an app,
+   * so a card shows "Nothing playing" until something has been started there.
+   * ------------------------------------------------------------------------- */
+  const MEDIA_BRANDS = [
+    { key: 'spotify', name: 'Spotify', idle: 'Open Spotify' },
+    { key: 'netflix', name: 'Netflix', idle: 'Open Netflix' },
+    { key: 'youtube', name: 'YouTube', idle: 'Open YouTube' }
+  ];
+  let sessions = [];
+  const artCache = {};
+  const mediaCards = {};
+
+  function pollSessions() {
+    try { sessions = JSON.parse(Native.nowPlayingAll()); } catch (e) { sessions = []; }
+    sessions.forEach((s) => {
+      if (artCache[s.pkg] && artCache[s.pkg].key === s.artKey) return;
+      artCache[s.pkg] = { key: s.artKey, art: Native.artFor(s.pkg) };
+    });
+    renderMedia();
+  }
+
+  function renderMedia() {
+    const row = $('#media-row');
+    if (!row) return;
+    const hasAccess = Native.hasNotificationAccess();
+    MEDIA_BRANDS.forEach((m) => {
+      const app = APPS.find((a) => ((a.pkg || '') + ' ' + (a.label || '')).toLowerCase().includes(m.key));
+      const ses = sessions.find((s) => s.pkg.toLowerCase().includes(m.key));
+      let card = mediaCards[m.key];
+      if (!app && !ses) { if (card) { card.remove(); delete mediaCards[m.key]; } return; }
+      if (!card) {
+        card = document.createElement('button');
+        card.className = 'mcard glass';
+        card.setAttribute('data-f', '');
+        card.dataset.action = 'launch';
+        card.dataset.brand = m.key;
+        card.innerHTML = '<img class="m-ico" alt=""><span class="m-state"></span>' +
+          '<span class="m-app"></span><span class="m-title"></span><span class="m-sub"></span>';
+        mediaCards[m.key] = card;
+      }
+      // Keep a stable order: Spotify, Netflix, YouTube.
+      const order = MEDIA_BRANDS.map((b) => mediaCards[b.key]).filter(Boolean);
+      order.forEach((c, i) => { if (row.children[i] !== c) row.insertBefore(c, row.children[i] || null); });
+
+      card.dataset.pkg = (ses && ses.pkg) || app.pkg;
+      card.dataset.label = m.name;
+      const ico = $('.m-ico', card);
+      const src = app && app.icon ? 'data:image/png;base64,' + app.icon : '';
+      if (src && ico.getAttribute('src') !== src) ico.src = src;
+      ico.hidden = !src;
+      $('.m-app', card).textContent = m.name;
+      const art = ses && artCache[ses.pkg] ? artCache[ses.pkg].art : '';
+      card.style.backgroundImage = art ? 'url("data:image/jpeg;base64,' + art + '")' : '';
+      card.classList.toggle('idle', !ses);
+      if (ses) {
+        $('.m-state', card).textContent = ses.state === 'playing' ? 'Playing' : 'Paused';
+        $('.m-title', card).textContent = ses.title || 'Playing';
+        $('.m-sub', card).textContent = ses.subtitle || '';
+      } else {
+        $('.m-state', card).textContent = '';
+        $('.m-title', card).textContent = hasAccess ? 'Nothing playing' : m.idle;
+        $('.m-sub', card).textContent = hasAccess ? m.idle : 'Allow Now playing access in Settings';
+      }
+    });
+  }
 
   /* ---------------------------------------------------------------------------
    * Now playing
@@ -488,6 +519,7 @@
     clearTimeout(npTimer);
     try { np = JSON.parse(Native.nowPlaying()); } catch (e) { np = { access: false, active: false }; }
     renderNow();
+    pollSessions();
     if (screen === 'now' && (!document.activeElement || document.activeElement === document.body || !visible(document.activeElement))) {
       focusEl($$('[data-f]', $('#now')).find(visible));
     }

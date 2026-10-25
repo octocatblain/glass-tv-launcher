@@ -127,7 +127,11 @@ class MainActivity : Activity() {
                 runJs("window.onBack&&window.onBack()")
                 return true
             }
-            KeyEvent.KEYCODE_SEARCH, KeyEvent.KEYCODE_VOICE_ASSIST -> {
+            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO -> {
+                runJs("window.onMenu&&window.onMenu()")
+                return true
+            }
+            KeyEvent.KEYCODE_SEARCH,KeyEvent.KEYCODE_VOICE_ASSIST -> {
                 runJs("window.onVoiceSearch&&window.onVoiceSearch()")
                 return true
             }

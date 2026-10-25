@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="320dp"
     android:height="180dp"
     android:viewportWidth="320"
     android:viewportHeight="180">
 
-    <!-- Dark gradient backdrop -->
-    <path
-        android:fillColor="#060A17"
-        android:pathData="M0,0h320v180h-320z" />
-
-    <!-- Ambient background glowing color orbs -->
-    <path
-        android:fillColor="#553B82F6"
-        android:pathData="M60,40m-90,0a90,90 0 1,1 180,0a90,90 0 1,1 -180,0" />
-    <path
-        android:fillColor="#449333EA"
-        android:pathData="M270,30m-80,0a80,80 0 1,1 160,0a80,80 0 1,1 -160,0" />
-    <path
-        android:fillColor="#3314B8A6"
-        android:pathData="M160,150m-100,0a100,100 0 1,1 200,0a100,100 0 1,1 -200,0" />
+    <!-- Gradient backdrop (matches the app icon) -->
+    <path android:pathData="M0,0h320v180h-320z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="320"
+                android:endY="180"
+                android:type="linear">
+                <item android:color="#FF3B82F6" android:offset="0" />
+                <item android:color="#FF0F766E" android:offset="0.5" />
+                <item android:color="#FF7C3AED" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
 
     <!-- Frosted glass card badge -->
     <path

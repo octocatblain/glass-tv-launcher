@@ -4,9 +4,11 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
@@ -45,6 +47,7 @@ class LauncherBridge(private val activity: MainActivity) {
                     val o = JSONObject()
                     o.put("pkg", pkg)
                     o.put("label", ri.loadLabel(pm).toString())
+                    o.put("system", (ri.activityInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0)
                     try {
                         o.put("icon", encodePng(ri.loadIcon(pm), 128))
                     } catch (_: Exception) {
@@ -67,6 +70,57 @@ class LauncherBridge(private val activity: MainActivity) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 activity.startActivity(intent)
             }
+        }
+    }
+
+    // ---- Removing apps ------------------------------------------------------------------
+
+    /**
+     * User-installed apps get the system uninstall dialog. Pre-installed (bloatware) apps can't be
+     * uninstalled by a normal app, so those open their App info page, where Android offers
+     * Disable (and "Uninstall updates") when the manufacturer allows it.
+     */
+    @JavascriptInterface
+    fun uninstall(pkg: String) {
+        activity.runOnUiThread {
+            if (pkg == activity.packageName) {
+                toast("Remove Glass Launcher from Settings > Apps")
+                return@runOnUiThread
+            }
+            val info = try {
+                pm.getApplicationInfo(pkg, 0)
+            } catch (_: Exception) {
+                toast("That app isn't installed")
+                return@runOnUiThread
+            }
+            if ((info.flags and ApplicationInfo.FLAG_SYSTEM) != 0) {
+                toast("Pre-installed app: choose Disable on the next screen", long = true)
+                openAppInfo(pkg)
+            } else {
+                try {
+                    activity.startActivity(
+                        Intent(Intent.ACTION_DELETE, Uri.parse("package:$pkg")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                } catch (_: Exception) {
+                    openAppInfo(pkg)
+                }
+            }
+        }
+    }
+
+    @JavascriptInterface
+    fun appInfo(pkg: String) {
+        activity.runOnUiThread { openAppInfo(pkg) }
+    }
+
+    private fun openAppInfo(pkg: String) {
+        try {
+            activity.startActivity(
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        } catch (_: Exception) {
+            toast("Couldn't open App info. Use Settings > Apps")
         }
     }
 
