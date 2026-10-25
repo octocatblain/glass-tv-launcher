@@ -51,12 +51,15 @@
       { pkg: 'com.netflix.ninja', label: 'Netflix', icon: '' },
       { pkg: 'com.google.android.youtube.tv', label: 'YouTube', icon: '' },
       { pkg: 'com.cricfytv', label: 'CricfyTV', icon: '' },
-      { pkg: 'com.phlox.tvwebbrowser', label: 'Browser', icon: '' }
+      { pkg: 'com.phlox.tvwebbrowser', label: 'Browser', icon: '' },
+      { pkg: 'com.tcl.demo.bloat', label: 'TCL Demo App', icon: '', system: true }
     ];
     const toastMock = (m) => showToast(m);
     return {
       requestApps() { setTimeout(() => window.onApps(JSON.stringify(demo)), 50); },
       launch(p) { toastMock('Would launch ' + p); },
+      uninstall(p) { toastMock('Would uninstall ' + p); },
+      appInfo(p) { toastMock('Would open app info: ' + p); },
       openVoiceSearch() { toastMock('Would start Voice Search'); },
       openSystem(k) { toastMock('Would open system settings: ' + k); },
       openNotificationAccess() { toastMock('Would open notification access'); },
@@ -185,7 +188,73 @@
     if (name === 'now') pollNow();
   }
 
-  function onBack() { if (screen !== 'home') show('home'); }
+  /* ---------------------------------------------------------------------------
+   * App options sheet (open / uninstall-or-disable / app info)
+   * ------------------------------------------------------------------------- */
+  // Never offered for removal on the Pre-installed screen: removing these can break the TV.
+  const PROTECTED = [
+    'android', 'com.android.settings', 'com.android.systemui', 'com.android.vending',
+    'com.android.packageinstaller', 'com.google.android.packageinstaller',
+    'com.google.android.permissioncontroller', 'com.google.android.gms', 'com.google.android.gsf',
+    'com.google.android.tvlauncher', 'com.google.android.tvrecommendations',
+    'com.google.android.leanbacklauncher', 'com.google.android.katniss',
+    'com.google.android.inputmethod.latin', 'com.android.providers.', 'com.android.inputmethod.'
+  ];
+  const isProtected = (pkg) => PROTECTED.some((p) => pkg === p || (p.endsWith('.') && pkg.startsWith(p)));
+
+  let sheetPkg = null;
+  let sheetReturn = null;
+  let sheetOpenedAt = 0;
+  const sheetOpen = () => !$('#sheet').hidden;
+
+  function openSheet(pkg) {
+    const app = APPS.find((a) => a.pkg === pkg);
+    if (!app) return;
+    sheetPkg = pkg;
+    sheetReturn = document.activeElement;
+    sheetOpenedAt = Date.now();
+    const holder = $('#sheet-icon');
+    holder.innerHTML = '';
+    if (app.icon) {
+      const img = document.createElement('img');
+      img.alt = '';
+      img.src = 'data:image/png;base64,' + app.icon;
+      holder.appendChild(img);
+      holder.className = '';
+    } else {
+      holder.className = 'ph';
+      holder.textContent = (app.label || '?').charAt(0).toUpperCase();
+    }
+    $('#sheet-name').textContent = app.label;
+    $('#sheet-kind').textContent = app.system ? 'Pre-installed app' : 'Installed app';
+    $('#sheet-remove').textContent = app.system ? 'Disable / remove' : 'Uninstall';
+    $('#sheet-note').textContent = !app.system ? ''
+      : isProtected(pkg)
+        ? 'Core system app. Disabling it can break your TV.'
+        : 'Android only lets you disable pre-installed apps. To remove one fully, run on a PC: adb shell pm uninstall -k --user 0 ' + pkg;
+    $('#sheet').hidden = false;
+    focusEl($('[data-f]', $('#sheet')));
+  }
+
+  function closeSheet() {
+    $('#sheet').hidden = true;
+    sheetPkg = null;
+    if (sheetReturn && sheetReturn.isConnected && visible(sheetReturn)) focusEl(sheetReturn);
+    sheetReturn = null;
+  }
+
+  function menuForFocused() {
+    const el = document.activeElement;
+    if (!el || !el.dataset || !el.dataset.pkg || sheetOpen()) return false;
+    openSheet(el.dataset.pkg);
+    return true;
+  }
+  window.onMenu = menuForFocused;
+
+  function onBack() {
+    if (sheetOpen()) { closeSheet(); return; }
+    if (screen !== 'home') show('home');
+  }
   window.onBack = onBack;
   window.goHome = () => show('home');
   window.onVoiceSearch = () => Native.openVoiceSearch();
@@ -214,7 +283,7 @@
 
   /* Spatial D-pad navigation: move to the nearest focusable element in the pressed direction. */
   function move(dir) {
-    const scope = $('.screen.active');
+    const scope = sheetOpen() ? $('#sheet') : $('.screen.active');
     const cur = document.activeElement && document.activeElement.matches('[data-f]') ? document.activeElement : null;
     const els = $$('[data-f]', scope).filter(visible);
     if (!cur) { focusEl(els[0]); return; }
@@ -244,6 +313,12 @@
     const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
     if (map[e.key]) { e.preventDefault(); move(map[e.key]); }
     else if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack') { e.preventDefault(); onBack(); }
+    else if (e.key === 'ContextMenu' || e.key === 'F2') { e.preventDefault(); menuForFocused(); }
+    else if (e.key === 'Enter' && e.repeat) {
+      // Holding OK on an app opens its options (key auto-repeat only starts after a hold).
+      const el = document.activeElement;
+      if (el && el.dataset && el.dataset.pkg && !sheetOpen()) { e.preventDefault(); menuForFocused(); }
+    }
   });
 
   /* ---------------------------------------------------------------------------
@@ -253,8 +328,15 @@
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-action]');
     if (!b) return;
+    // The key-up that ends a long press must not also trigger the button that now has focus.
+    if (Date.now() - sheetOpenedAt < 600) return;
     const d = b.dataset;
     switch (d.action) {
+      case 'manage': openSheet(d.pkg); break;
+      case 'sheetClose': closeSheet(); break;
+      case 'sheetOpen': { const p = sheetPkg; closeSheet(); if (p) Native.launch(p); break; }
+      case 'sheetInfo': if (sheetPkg) Native.appInfo(sheetPkg); break;
+      case 'sheetRemove': if (sheetPkg) Native.uninstall(sheetPkg); break;
       case 'screen': show(d.to); break;
       case 'back': show('home'); break;
       case 'launch': Native.launch(d.pkg); break;
@@ -297,11 +379,11 @@
    * ------------------------------------------------------------------------- */
   let APPS = [];
 
-  function appTile(a) {
+  function appTile(a, action) {
     const b = document.createElement('button');
     b.className = 'tile glass';
     b.setAttribute('data-f', '');
-    b.dataset.action = 'launch';
+    b.dataset.action = action || 'launch';
     b.dataset.pkg = a.pkg;
     b.dataset.label = a.label;
 
@@ -359,6 +441,16 @@
     const grid = $('#apps-grid');
     grid.innerHTML = '';
     byLabel.forEach((a) => grid.appendChild(appTile(a)));
+
+    const bloat = $('#bloat-grid');
+    bloat.innerHTML = '';
+    byLabel.filter((a) => a.system && !isProtected(a.pkg)).forEach((a) => bloat.appendChild(appTile(a, 'manage')));
+    if (!bloat.children.length) {
+      const none = document.createElement('span');
+      none.className = 'sd';
+      none.textContent = 'No removable pre-installed apps found.';
+      bloat.appendChild(none);
+    }
 
     // Rebuilding the lists drops focus; put it back on the same app if possible.
     if (!document.activeElement || !document.activeElement.isConnected || document.activeElement === document.body) {
