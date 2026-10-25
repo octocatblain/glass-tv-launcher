@@ -30,4 +30,13 @@ android {
     }
 }
 
+// After every debug build, copy the APK to <project>/dist/GlassLauncher.apk so it is easy to find
+// (and so the README download link always points at the latest build).
+val copyApkToDist by tasks.registering(Copy::class) {
+    from(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
+    into(rootProject.layout.projectDirectory.dir("dist"))
+    rename { "GlassLauncher.apk" }
+}
+tasks.matching { it.name == "assembleDebug" }.configureEach { finalizedBy(copyApkToDist) }
+
 // No third-party dependencies: the launcher only uses the Android framework and WebView.

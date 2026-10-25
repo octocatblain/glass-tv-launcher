@@ -432,7 +432,8 @@
   const MEDIA_BRANDS = [
     { key: 'spotify', name: 'Spotify' },
     { key: 'netflix', name: 'Netflix' },
-    { key: 'youtube', name: 'YouTube' }
+    // SmartTube (ad-free YouTube client) is preferred when installed; the official app is the fallback.
+    { key: 'youtube', name: 'YouTube', match: ['smarttube', 'youtube'] }
   ];
   let sessions = [];
   const artCache = {};
@@ -468,8 +469,12 @@
     const row = $('#media-row');
     const hasAccess = Native.hasNotificationAccess();
     MEDIA_BRANDS.forEach((m) => {
-      const app = APPS.find((a) => ((a.pkg || '') + ' ' + (a.label || '')).toLowerCase().includes(m.key));
-      const ses = sessions.find((s) => s.pkg.toLowerCase().includes(m.key));
+      const terms = m.match || [m.key];
+      const hay = (a) => ((a.pkg || '') + ' ' + (a.label || '')).toLowerCase();
+      // Terms are in priority order, so the first term that matches an installed app wins.
+      let app = null;
+      for (const t of terms) { app = APPS.find((a) => hay(a).includes(t)); if (app) break; }
+      const ses = sessions.find((s) => terms.some((t) => s.pkg.toLowerCase().includes(t)));
       let card = mediaCards[m.key];
       if (!app && !ses) { if (card) { card.remove(); delete mediaCards[m.key]; } return; }
       if (!card) {
