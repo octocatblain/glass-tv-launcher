@@ -1,2 +1,12 @@
 # Project exclude paths
 /.gradle/
+
+# Build output (the shareable APK is copied to /dist, which IS tracked)
+/build/
+/app/build/
+
+# Machine-specific files
+/local.properties
+*.iml
+/.idea/caches/
+/.idea/workspace.xml
