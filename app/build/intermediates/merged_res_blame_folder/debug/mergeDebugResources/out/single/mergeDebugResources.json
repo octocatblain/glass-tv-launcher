@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-debug-4:\\drawable_ic_launcher.xml.flat",
+        "source": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-main-6:\\drawable\\ic_launcher.xml"
+    },
+    {
+        "merged": "com.glasstv.launcher.app-debug-4:/drawable_banner.xml.flat",
+        "source": "com.glasstv.launcher.app-main-6:/drawable/banner.xml"
+    },
+    {
+        "merged": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-debug-4:\\drawable_banner.xml.flat",
+        "source": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-main-6:\\drawable\\banner.xml"
+    },
+    {
+        "merged": "com.glasstv.launcher.app-debug-4:/drawable_ic_launcher.xml.flat",
+        "source": "com.glasstv.launcher.app-main-6:/drawable/ic_launcher.xml"
+    }
+]

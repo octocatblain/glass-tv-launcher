@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Glass Launcher</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+
+  <!-- ============================== HOME ============================== -->
+  <section id="home" class="screen active">
+    <!-- One row: what's playing in Spotify, Netflix and YouTube (filled by app.js) -->
+    <div class="media-row" id="media-row"></div>
+
+    <header class="top">
+      <div class="clock"><span id="clock-time">9:41</span><span id="clock-date">Tue, Oct 24</span></div>
+      <div class="header-center">
+        <button class="search-btn glass" data-f data-action="voiceSearch" aria-label="Voice Search">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"></path><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"></path></svg>
+          <span>Search</span>
+        </button>
+        <nav class="pills glass" aria-label="Main">
+          <button class="pill on" data-f data-action="screen" data-to="home">Home</button>
+          <button class="pill" data-f data-action="screen" data-to="apps">All apps</button>
+        </nav>
+      </div>
+      <div class="top-right">
+        <button id="np-chip" class="chip-btn glass" data-f data-action="screen" data-to="now" hidden>
+          <span class="eq-bars"><i></i><i></i><i></i></span>
+          <span id="np-chip-text">Now playing</span>
+        </button>
+        <button class="round glass" data-f data-action="screen" data-to="settings" aria-label="Settings">
+          <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="hero">
+      <span class="eyebrow" id="hero-eyebrow">Good evening</span>
+      <h1 id="hero-title">Welcome home</h1>
+      <p id="hero-desc">Select an app below to launch immediately.</p>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head">
+        <span class="sec-label">Favorite Apps</span>
+        <span class="sec-sub">Press OK on remote to launch</span>
+      </div>
+      <div class="row" id="apps-row"></div>
+    </div>
+  </section>
+
+  <!-- ============================== ALL APPS ============================== -->
+  <section id="apps" class="screen">
+    <header class="sub-top">
+      <div class="sub-left">
+        <button class="round big glass" data-f data-action="back" aria-label="Back to home">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <h2>All apps</h2>
+      </div>
+      <span class="clock-r" data-clock></span>
+    </header>
+    <div class="grid-wrap"><div class="grid" id="apps-grid"></div></div>
+  </section>
+
+  <!-- ============================== SETTINGS ============================== -->
+  <section id="settings" class="screen">
+    <header class="sub-top">
+      <div class="sub-left">
+        <button class="round big glass" data-f data-default data-action="back" aria-label="Back to home">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <h2>Settings</h2>
+      </div>
+      <span class="clock-r" data-clock></span>
+    </header>
+
+    <div class="set-body">
+      <nav class="side glass" aria-label="Android settings">
+        <span class="side-label">Android settings</span>
+        <button class="side-item" data-f data-action="system" data-kind="network">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0114 0M8.5 16.1a6 6 0 017 0"></path><circle cx="12" cy="20" r="0.8" fill="#fff"></circle></svg>
+          Network &amp; Internet
+        </button>
+        <button class="side-item" data-f data-action="system" data-kind="display">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8"></path></svg>
+          Display
+        </button>
+        <button class="side-item" data-f data-action="system" data-kind="sound">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"></path></svg>
+          Sound
+        </button>
+        <button class="side-item" data-f data-action="system" data-kind="apps">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1.5"></rect><rect x="14" y="4" width="6" height="6" rx="1.5"></rect><rect x="4" y="14" width="6" height="6" rx="1.5"></rect><rect x="14" y="14" width="6" height="6" rx="1.5"></rect></svg>
+          Apps
+        </button>
+        <button class="side-item" data-f data-action="system" data-kind="accessibility">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"></circle><path d="M5 9l7 1 7-1M12 10v4M9 21l3-7 3 7"></path></svg>
+          Accessibility
+        </button>
+        <button class="side-item" data-f data-action="system" data-kind="privacy">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 018 0v3"></path></svg>
+          Privacy
+        </button>
+        <button class="side-item" data-f data-action="system" data-kind="all">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><circle cx="12" cy="8" r="0.7" fill="#fff"></circle></svg>
+          All settings
+        </button>
+      </nav>
+
+      <div class="panel glass">
+        <div class="panel-head">
+          <h3>Launcher</h3>
+          <span>Options for this home screen.</span>
+        </div>
+
+        <button class="srow" data-f data-action="accent">
+          <span class="st"><span class="sl">Accent color</span><span class="sd">Progress bars, toggles and highlights</span></span>
+          <span class="dots" id="accent-dots"></span>
+        </button>
+
+        <button class="srow" data-f data-action="scale">
+          <span class="st"><span class="sl">Screen size</span><span class="sd">Zoom the whole launcher if it looks too big or too small</span></span>
+          <span class="sv" id="scale-val">100%</span>
+        </button>
+
+        <button class="srow" data-f data-action="margin">
+          <span class="st"><span class="sl">Screen edge margin</span><span class="sd">Pull content in if your TV crops the edges (overscan)</span></span>
+          <span class="sv" id="margin-val">Off</span>
+        </button>
+
+        <button class="srow" data-f data-action="toggle" data-key="clock24" aria-pressed="false">
+          <span class="st"><span class="sl">24-hour clock</span><span class="sd">Show time as 21:41 instead of 9:41 PM</span></span>
+          <span class="switch"><i></i></span>
+        </button>
+
+        <button class="srow" data-f data-action="toggle" data-key="lite" aria-pressed="false">
+          <span class="st"><span class="sl">Reduce glass effects</span><span class="sd">Turn on if the interface feels slow</span></span>
+          <span class="switch"><i></i></span>
+        </button>
+
+        <button class="srow" data-f data-action="access">
+          <span class="st"><span class="sl">Now playing access</span><span class="sd">Lets the launcher show what is playing</span></span>
+          <span class="sv" id="access-status">Off</span>
+        </button>
+
+        <button class="srow" data-f data-action="system" data-kind="home">
+          <span class="st"><span class="sl">Default launcher</span><span class="sd">Choose Glass Launcher as your home screen</span></span>
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== NOW PLAYING ============================== -->
+  <section id="now" class="screen" data-state="paused">
+    <div class="now-bg"></div>
+    <div class="now-art" id="now-art"></div>
+    <div class="now-shade-b"></div>
+    <div class="now-shade-t"></div>
+
+    <header class="now-top">
+      <div class="sub-left">
+        <button class="round big glass" data-f data-action="back" aria-label="Back to home">
+          <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <span class="eyebrow light">Now playing</span>
+      </div>
+      <span class="clock-r" data-clock></span>
+    </header>
+
+    <div class="now-empty glass" id="now-empty" hidden>
+      <h2 id="now-empty-title">Nothing is playing</h2>
+      <p id="now-empty-text">Start something in any app and it will show up here.</p>
+      <button class="btn glass" id="now-empty-btn" data-f data-action="access" hidden>Allow now playing access</button>
+    </div>
+
+    <div id="now-main">
+      <div class="source glass">
+        <span class="eyebrow light">Playing in</span>
+        <div class="source-app">
+          <div class="ph" id="source-icon"></div>
+          <span id="source-name">App</span>
+        </div>
+        <button class="btn glass small" data-f data-action="openSource">Open app</button>
+      </div>
+
+      <div class="ctrl glass">
+        <div class="ctrl-head">
+          <h1 id="now-title">Title</h1>
+          <span id="now-sub">Subtitle</span>
+        </div>
+
+        <div class="scrub">
+          <span class="t-l" id="t-pos">0:00</span>
+          <div class="bar"><div class="fill" id="bar-fill"></div><div class="knob" id="bar-knob"></div></div>
+          <span class="t-r" id="t-left">0:00</span>
+        </div>
+
+        <div class="transport">
+          <button class="tbtn" data-f data-action="media" data-cmd="prev" aria-label="Previous">
+            <svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M20 5l-10 7 10 7z"></path></svg>
+          </button>
+          <button class="tbtn" data-f data-action="media" data-cmd="rew" aria-label="Back 10 seconds">
+            <svg aria-hidden="true" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9M3 4v5h5"></path><text x="12" y="15.5" text-anchor="middle" font-size="8" font-weight="700" fill="#fff" stroke="none">10</text></svg>
+          </button>
+          <button class="tbtn main" data-f data-default data-action="media" data-cmd="toggle" aria-label="Play or pause">
+            <svg class="i-pause" aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="#0b1020"><rect x="6" y="5" width="4" height="14" rx="1.2"></rect><rect x="14" y="5" width="4" height="14" rx="1.2"></rect></svg>
+            <svg class="i-play" aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="#0b1020"><path d="M7 4.5v15a1 1 0 001.5.86l12-7.5a1 1 0 000-1.72l-12-7.5A1 1 0 007 4.5z"></path></svg>
+          </button>
+          <button class="tbtn" data-f data-action="media" data-cmd="ff" aria-label="Forward 10 seconds">
+            <svg aria-hidden="true" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-9-9M21 4v5h-5"></path><text x="12" y="15.5" text-anchor="middle" font-size="8" font-weight="700" fill="#fff" stroke="none">10</text></svg>
+          </button>
+          <button class="tbtn" data-f data-action="media" data-cmd="next" aria-label="Next">
+            <svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 5v14M4 5l10 7-10 7z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast" class="glass" hidden></div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+com.glasstv.launcher:string/app_name = 0x7f030000
+com.glasstv.launcher:style/Theme.GlassTV = 0x7f040000
+com.glasstv.launcher:drawable/ic_launcher = 0x7f020001
+com.glasstv.launcher:drawable/banner = 0x7f020000
+com.glasstv.launcher:color/bg = 0x7f010000

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+
+    <!-- Gradient backdrop (matches the app icon) -->
+    <path android:pathData="M0,0h320v180h-320z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="320"
+                android:endY="180"
+                android:type="linear">
+                <item android:color="#FF3B82F6" android:offset="0" />
+                <item android:color="#FF0F766E" android:offset="0.5" />
+                <item android:color="#FF7C3AED" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Frosted glass card badge -->
+    <path
+        android:fillColor="#22FFFFFF"
+        android:pathData="M32,32h256a20,20 0 0 1,20 20v76a20,20 0 0 1,-20 20h-256a20,20 0 0 1,-20 -20v-76a20,20 0 0 1,20 -20z" />
+
+    <!-- Glass card inner accent highlight -->
+    <path
+        android:fillColor="#1AFFFFFF"
+        android:pathData="M36,36h248a16,16 0 0 1,16 16v68a16,16 0 0 1,-16 16h-248a16,16 0 0 1,-16 -16v-68a16,16 0 0 1,16 -16z" />
+
+    <!-- Play icon badge -->
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M64,66h48a12,12 0 0 1,12 12v24a12,12 0 0 1,-12 12h-48a12,12 0 0 1,-12 -12v-24a12,12 0 0 1,12 -12z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M83,72l14,9l-14,9z" />
+
+    <!-- GLASS typography emblem -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M152,72a12,12 0 0 0 -12,12a12,12 0 0 0 12,12a12,12 0 0 0 10,-5v-7h-9v4h5a7,7 0 0 1 -6,3a8,8 0 0 1 -8,-8a8,8 0 0 1 8,-8a7,7 0 0 1 6,3l3,-3a12,12 0 0 0 -7,-2z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M168,73h4v19h10v4h-14z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M190,73h4l8,23h-4l-2,-6h-8l-2,6h-4zM191,80l-3,7h6z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M208,76a5,5 0 0 1 5,-3h5v4h-5a2,2 0 0 0 -2,2a2,2 0 0 0 2,2h3a5,5 0 0 1 5,5a5,5 0 0 1 -5,5h-6v-4h6a2,2 0 0 0 2,-2a2,2 0 0 0 -2,-2h-3a5,5 0 0 1 -5,-5z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M224,76a5,5 0 0 1 5,-3h5v4h-5a2,2 0 0 0 -2,2a2,2 0 0 0 2,2h3a5,5 0 0 1 5,5a5,5 0 0 1 -5,5h-6v-4h6a2,2 0 0 0 2,-2a2,2 0 0 0 -2,-2h-3a5,5 0 0 1 -5,-5z" />
+</vector>
