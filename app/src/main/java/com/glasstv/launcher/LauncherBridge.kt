@@ -72,6 +72,13 @@ class LauncherBridge(private val activity: MainActivity) {
         }
     }
 
+    @JavascriptInterface
+    fun version(): String = try {
+        pm.getPackageInfo(activity.packageName, 0).versionName ?: ""
+    } catch (_: Exception) {
+        ""
+    }
+
     // ---- Removing apps ------------------------------------------------------------------
 
     /**
@@ -83,7 +90,7 @@ class LauncherBridge(private val activity: MainActivity) {
     fun uninstall(pkg: String) {
         activity.runOnUiThread {
             if (pkg == activity.packageName) {
-                toast("Remove Glass Launcher from Settings > Apps")
+                toast("Remove Hearth from Settings > Apps")
                 return@runOnUiThread
             }
             val info = try {

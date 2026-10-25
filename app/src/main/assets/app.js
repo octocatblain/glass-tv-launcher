@@ -71,6 +71,7 @@
   fit();
 
   function applySettings() {
+    $('#app-version').textContent = 'v' + (Native.version ? Native.version() : '1.1');
     $('#scale-val').textContent = S.scale + '%';
     $('#margin-val').textContent = S.margin ? S.margin + '%' : 'Off';
     document.body.classList.toggle('flat', !S.glass);
@@ -432,8 +433,7 @@
   const MEDIA_BRANDS = [
     { key: 'spotify', name: 'Spotify' },
     { key: 'netflix', name: 'Netflix' },
-    // SmartTube (ad-free YouTube client) is preferred when installed; the official app is the fallback.
-    { key: 'youtube', name: 'YouTube', match: ['smarttube', 'youtube'] }
+    { key: 'youtube', name: 'YouTube' }
   ];
   let sessions = [];
   const artCache = {};
@@ -444,6 +444,15 @@
   let last = {};
   try { last = JSON.parse(localStorage.getItem('glass.last') || '{}') || {}; } catch (e) { last = {}; }
   const saveLast = () => { try { localStorage.setItem('glass.last', JSON.stringify(last)); } catch (e) { /* storage full or blocked */ } };
+
+  // One-time clean-up: the YouTube card used to be fed by a third-party YouTube client that is no longer
+  // supported, so forget what it recorded and start again from the official app.
+  try {
+    if (!localStorage.getItem('hearth.migrated')) {
+      delete last.youtube; saveLast();
+      localStorage.setItem('hearth.migrated', '1');
+    }
+  } catch (e) { /* storage unavailable */ }
 
   function pollSessions() {
     try { sessions = JSON.parse(Native.nowPlayingAll()); } catch (e) { sessions = []; }

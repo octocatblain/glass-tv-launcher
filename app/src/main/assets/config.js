@@ -5,7 +5,7 @@ window.CONFIG = {
     "com.spotify.tv.android",
     "com.spotify.music",
     "com.netflix.ninja",
-    "org.smarttube.stable",
+    "com.google.android.youtube.tv",
     "com.cricfytv",
     "com.cricfy.tv",
     "tv.cricfy",

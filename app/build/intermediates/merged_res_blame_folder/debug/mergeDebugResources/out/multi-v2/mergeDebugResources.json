@@ -16,20 +16,17 @@
                 {
                     "source": "C:\\Users\\blain\\OneDrive\\Desktop\\glass-tv-launcher\\app\\src\\main\\res\\values\\themes.xml",
                     "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endLines": "7",
-                        "endColumns": "12",
-                        "endOffsets": "392"
+                        "startLines": "-1",
+                        "startColumns": "-1",
+                        "startOffsets": "-1"
                     },
                     "to": {
                         "startLines": "4",
                         "startColumns": "4",
-                        "startOffsets": "144",
+                        "startOffsets": "147",
                         "endLines": "9",
                         "endColumns": "12",
-                        "endOffsets": "481"
+                        "endOffsets": "484"
                     }
                 },
                 {
@@ -38,15 +35,15 @@
                         "startLines": "2",
                         "startColumns": "4",
                         "startOffsets": "55",
-                        "endColumns": "51",
-                        "endOffsets": "102"
+                        "endColumns": "54",
+                        "endOffsets": "105"
                     },
                     "to": {
                         "startLines": "3",
                         "startColumns": "4",
                         "startOffsets": "92",
-                        "endColumns": "51",
-                        "endOffsets": "139"
+                        "endColumns": "54",
+                        "endOffsets": "142"
                     }
                 }
             ]
@@ -57,6 +54,11 @@
                 {
                     "source": "C:\\Users\\blain\\OneDrive\\Desktop\\glass-tv-launcher\\app\\src\\main\\res\\values\\colors.xml",
                     "from": {
+                        "startLines": "-1",
+                        "startColumns": "-1",
+                        "startOffsets": "-1"
+                    },
+                    "to": {
                         "startLines": "2",
                         "startColumns": "4",
                         "startOffsets": "55",
@@ -74,25 +76,27 @@
                     "to": {
                         "startLines": "4",
                         "startColumns": "4",
-                        "startOffsets": "144",
+                        "startOffsets": "136",
                         "endLines": "9",
                         "endColumns": "12",
-                        "endOffsets": "481"
+                        "endOffsets": "473"
                     }
                 },
                 {
                     "source": "C:\\Users\\blain\\OneDrive\\Desktop\\glass-tv-launcher\\app\\src\\main\\res\\values\\strings.xml",
                     "from": {
-                        "startLines": "-1",
-                        "startColumns": "-1",
-                        "startOffsets": "-1"
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "43",
+                        "endOffsets": "94"
                     },
                     "to": {
                         "startLines": "3",
                         "startColumns": "4",
                         "startOffsets": "92",
-                        "endColumns": "51",
-                        "endOffsets": "139"
+                        "endColumns": "43",
+                        "endOffsets": "131"
                     }
                 }
             ]

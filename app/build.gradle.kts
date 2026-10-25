@@ -11,8 +11,8 @@ android {
         applicationId = "com.glasstv.launcher"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     buildTypes {
@@ -30,12 +30,12 @@ android {
     }
 }
 
-// After every debug build, copy the APK to <project>/dist/GlassLauncher.apk so it is easy to find
+// After every debug build, copy the APK to <project>/dist/Hearth.apk so it is easy to find
 // (and so the README download link always points at the latest build).
 val copyApkToDist by tasks.registering(Copy::class) {
     from(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
     into(rootProject.layout.projectDirectory.dir("dist"))
-    rename { "GlassLauncher.apk" }
+    rename { "Hearth.apk" }
 }
 tasks.matching { it.name == "assembleDebug" }.configureEach { finalizedBy(copyApkToDist) }
 

@@ -1,9 +1,14 @@
 /* The UI is laid out on a fixed 1920x1080 stage that app.js scales to the real screen. */
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(ellipse 75% 75% at 15% -10%,#1d2740 0%,rgba(29,39,64,0) 70%),#0e1118}
-body{font-family:'Google Sans','Product Sans',Roboto,system-ui,sans-serif;color:#fff;-webkit-user-select:none;user-select:none}
-/* Google TV look: flat dark surfaces, 14px corners, white focus ring. */
-:root{--accent:#8ab4ff;--muted:rgba(255,255,255,.68);--bg:#0e1118;--surface:#1a1e29;--surface-hi:#2a3040;--line:rgba(255,255,255,.08);--r:14px}
+/* Inter (self-hosted, variable weight 100-900), SIL OFL: see fonts/OFL.txt */
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/inter-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/inter-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+/* Red Star Standard: navy #013480 is the identity colour, red #C41930 the action colour,
+   Inter the typeface, 6-8px corners. Tokens match the website's styles.css. */
+:root{--brand:#013480;--accent:#C41930;--on-dark:#A9C2F0;--muted:rgba(255,255,255,.72);--bg:#010F28;--surface:#0A2150;--surface-hi:#14306B;--line:rgba(169,194,240,.16);--r:8px}
+html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(ellipse 75% 75% at 15% -10%,#013480 0%,rgba(1,52,128,0) 70%),#010F28}
+body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#fff;-webkit-user-select:none;user-select:none;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
 button{font:inherit;color:inherit;cursor:pointer;margin:0;background:none}
 ::-webkit-scrollbar{display:none}
@@ -16,9 +21,9 @@ button{font:inherit;color:inherit;cursor:pointer;margin:0;background:none}
 
 /* ---------- colour glows (what the glass blurs) ---------- */
 .orb{display:block;position:absolute;pointer-events:none}
-.o1{left:-260px;top:-320px;width:1200px;height:1200px;background:radial-gradient(circle,rgba(59,130,246,.5),rgba(59,130,246,0) 68%)}
-.o2{right:-300px;top:120px;width:1100px;height:1100px;background:radial-gradient(circle,rgba(147,51,234,.42),rgba(147,51,234,0) 68%)}
-.o3{left:380px;bottom:-560px;width:1300px;height:1000px;background:radial-gradient(circle,rgba(20,184,166,.36),rgba(20,184,166,0) 68%)}
+.o1{left:-260px;top:-320px;width:1200px;height:1200px;background:radial-gradient(circle,rgba(10,74,176,.62),rgba(10,74,176,0) 68%)}
+.o2{right:-300px;top:120px;width:1100px;height:1100px;background:radial-gradient(circle,rgba(196,25,48,.30),rgba(196,25,48,0) 68%)}
+.o3{left:380px;bottom:-560px;width:1300px;height:1000px;background:radial-gradient(circle,rgba(1,52,128,.75),rgba(1,52,128,0) 68%)}
 
 /* ---------- surfaces + focus ---------- */
 /* Frosted glass: translucent fill, blur of what is behind, bright top edge. */
@@ -27,7 +32,8 @@ button{font:inherit;color:inherit;cursor:pointer;margin:0;background:none}
 body.flat .glass{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
 body.flat .orb{display:none}
 [data-f]{outline:none;border:3px solid transparent;transition:transform .18s cubic-bezier(.16,1,.3,1),background .18s ease,border-color .18s ease,box-shadow .18s ease}
-[data-f]:focus{border-color:#fff;background:rgba(255,255,255,.24);box-shadow:0 18px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.4);transform:scale(1.05)}
+/* Focus: a clean white border and a gentle lift. */
+[data-f]:focus{border-color:#fff;background:rgba(255,255,255,.22);box-shadow:0 18px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.4);transform:scale(1.05)}
 body.flat [data-f]:focus{background:var(--surface-hi);box-shadow:0 18px 44px rgba(0,0,0,.6)}
 
 /* ---------- home ---------- */
@@ -60,9 +66,9 @@ body.flat [data-f]:focus{background:var(--surface-hi);box-shadow:0 18px 44px rgb
 .m-app{font-size:17px;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .m-app{flex:1;min-width:0}
 .m-state{flex:none;white-space:nowrap;margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 12px 5px 10px;border-radius:999px;background:rgba(5,8,18,.72)}
-.m-state b{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.m-state b{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--on-dark)}
 .m-eq{display:flex;align-items:flex-end;gap:2px;width:14px;height:14px}
-.m-eq i{flex:1;height:35%;background:var(--accent);border-radius:2px}
+.m-eq i{flex:1;height:35%;background:var(--on-dark);border-radius:2px}
 .mcard.is-playing .m-eq i{animation:eq 1s ease-in-out infinite alternate}
 .mcard.is-playing .m-eq i:nth-child(2){animation-delay:.25s}
 .mcard.is-playing .m-eq i:nth-child(3){animation-delay:.5s}
@@ -124,13 +130,20 @@ body.flat [data-f]:focus{background:var(--surface-hi);box-shadow:0 18px 44px rgb
 /* ---------- app options sheet ---------- */
 .sheet-back{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(5,7,12,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 body.flat .sheet-back{background:rgba(5,7,12,.8);-webkit-backdrop-filter:none;backdrop-filter:none}
-.sheet{width:720px;display:flex;flex-direction:column;gap:10px;padding:32px;border-radius:calc(var(--r) + 4px);background:rgba(30,38,64,.62)}
+.sheet{width:720px;display:flex;flex-direction:column;gap:10px;padding:32px;border-radius:calc(var(--r) + 4px);background:rgba(1,33,86,.7)}
 body.flat .sheet{background:var(--surface)}
 .sheet-head{display:flex;align-items:center;gap:20px;padding:0 12px 14px}
 .sheet-head .ph,.sheet-head img{width:72px;height:72px;border-radius:50%}
 .sheet-head .sl{font-size:30px}
 .srow.danger .sl{color:#ff8a8a}
 .sheet-note{padding:10px 12px 0;line-height:1.4}
+
+/* ---------- about (Settings) ---------- */
+.about{display:flex;align-items:center;gap:18px;margin-top:auto;padding:20px 12px 0;border-top:1px solid var(--line)}
+.about img{width:54px;height:43px;flex:none}
+.about b{display:block;font-size:19px;font-weight:700}
+.about b .ver{display:inline;font-size:15px;font-weight:600;color:var(--on-dark);margin:0 0 0 4px}
+.about>div>span{display:block;font-size:15px;line-height:1.35;color:var(--muted);margin-top:3px}
 
 /* ---------- toast ---------- */
 #toast{position:absolute;left:50%;bottom:48px;transform:translateX(-50%);max-width:1100px;padding:18px 32px;border-radius:999px;font-size:22px;font-weight:600;z-index:30}

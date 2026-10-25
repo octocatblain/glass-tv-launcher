@@ -17,7 +17,7 @@ import android.webkit.WebViewClient
 
 /**
  * Android TV OS 12 compatible Home Launcher host activity.
- * Renders the Glass UI in a hardware-accelerated WebView and handles TV remote keys.
+ * Hearth: renders the UI in a hardware-accelerated WebView and handles TV remote keys.
  */
 class MainActivity : Activity() {
 
@@ -28,7 +28,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         web = WebView(this).apply {
-            setBackgroundColor(0xFF0E1118.toInt())
+            setBackgroundColor(0xFF010F28.toInt())
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
             isFocusable = true
             isFocusableInTouchMode = true

@@ -1,22 +1,23 @@
 <div align="center">
 
-# Glass Launcher
+# Hearth
 
-**A fast, frosted-glass home screen for Android TV and Google TV.**
+**A fast, frosted-glass home screen for Android TV and Google TV.**  
+*A [Red Star Standard](https://redstarstandard.co.ke) product.*
 
-[![Download APK](https://img.shields.io/badge/Download-APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/octocatblain/glass-tv-launcher/raw/main/dist/GlassLauncher.apk)
-![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3ddc84?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-1.0-8ab4ff?style=for-the-badge)
+[![Download APK](https://img.shields.io/badge/Download-APK-C41930?style=for-the-badge&logo=android&logoColor=white)](https://github.com/octocatblain/glass-tv-launcher/raw/main/dist/Hearth.apk)
+![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-013480?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.1-013480?style=for-the-badge)
 
-<img src="docs/mockup.png" alt="Glass Launcher on a TV" width="900">
+<img src="docs/mockup.png" alt="Hearth on a TV" width="900">
 
 </div>
 
-> **Direct link:** [`dist/GlassLauncher.apk`](dist/GlassLauncher.apk) (about 850 KB). This is a debug-signed build for sideloading; it is not on the Play Store.
+> **Direct link:** [`dist/Hearth.apk`](dist/Hearth.apk) (about 850 KB). This is a debug-signed build for sideloading; it is not on the Play Store.
 
 ## Features
 
-- **Glass interface**: frosted, blurred surfaces over soft colour glows, rounded 14 px corners and a clear white focus ring that is easy to follow from the sofa. A **Glass effects** switch turns the blur off if your TV is slow.
+- **Red Star Standard design**: navy and red brand palette, Inter typeface, frosted glass surfaces over soft colour glows, and a white-and-red focus ring that is easy to follow from the sofa. A **Glass effects** switch turns the blur off if your TV is slow.
 - **Favorite apps row**: your most-used apps as round icons. Add, remove and reorder them from **Settings → Manage favorites** or with the options menu on any app.
 - **Now-playing cards**: Spotify, Netflix and YouTube show what is playing or paused, with cover art. When nothing is playing, each card keeps showing the **last thing you played** in that app.
 - **All apps** grid and **Pre-installed apps** screen for finding and removing bloatware.
@@ -42,7 +43,7 @@ You need an Android TV or Google TV device on Android 7.0 or newer. Pick one met
 1. Install **Downloader** (by AFTVnews) from the Play Store or Google Play on your TV.
 2. Allow it to install unknown apps: **Settings → Apps → Security & restrictions → Unknown sources → Downloader** (the path varies by TV brand).
 3. Open Downloader and enter this address:
-   `https://github.com/octocatblain/glass-tv-launcher/raw/main/dist/GlassLauncher.apk`
+   `https://github.com/octocatblain/glass-tv-launcher/raw/main/dist/Hearth.apk`
 4. When the download finishes, choose **Install**, then **Open**.
 
 ### Option B: over ADB from a computer
@@ -53,16 +54,16 @@ You need an Android TV or Google TV device on Android 7.0 or newer. Pick one met
 
    ```bash
    adb connect <tv-ip-address>:5555      # skip this if connected by USB
-   adb install -r dist/GlassLauncher.apk
+   adb install -r dist/Hearth.apk
    ```
 
 ### Option C: USB drive
 
-Copy `dist/GlassLauncher.apk` to a USB drive, plug it into the TV, open it with a file manager app (for example **File Commander** or **X-plore**) and install it.
+Copy `dist/Hearth.apk` to a USB drive, plug it into the TV, open it with a file manager app (for example **File Commander** or **X-plore**) and install it.
 
 ## Make it your home screen
 
-1. Open **Glass Launcher** once. It offers to become your default home app. Choose **Glass Launcher** and **Always**.
+1. Open **Hearth** once. It offers to become your default home app. Choose **Hearth** and **Always**.
 2. If no prompt appears, use **Settings → Default launcher** inside the launcher, or Android's **Settings → Apps → Default apps → Home app**.
 3. Still opening the stock screen? Many TVs insist on their own launcher. From a computer with ADB:
 
@@ -89,7 +90,7 @@ Copy `dist/GlassLauncher.apk` to a USB drive, plug it into the TV, open it with 
 
 Android only shares what is playing with apps you allow.
 
-- In the launcher: **Settings → Now playing access**, then enable Glass Launcher; or
+- In the launcher: **Settings → Now playing access**, then enable Hearth; or
 - Over ADB, which also works around the "restricted setting" block on Android 13+:
 
   ```bash
@@ -148,14 +149,14 @@ cd glass-tv-launcher
 
 If Gradle says `JAVA_HOME` is not set, point it at a JDK 17+, for example Android Studio's bundled one (`<Android Studio>/jbr`).
 
-The APK is written to `app/build/outputs/apk/debug/app-debug.apk` and **copied to `dist/GlassLauncher.apk`** after every debug build, so the download link above always matches your latest build.
+The APK is written to `app/build/outputs/apk/debug/app-debug.apk` and **copied to `dist/Hearth.apk`** after every debug build, so the download link above always matches your latest build.
 
 ## Project structure
 
 ```
 glass-tv-launcher/
 ├── dist/
-│   └── GlassLauncher.apk          ← ready-to-install APK (updated by every build)
+│   └── Hearth.apk          ← ready-to-install APK (updated by every build)
 ├── docs/
 │   ├── mockup.png                 ← hero image used in this README
 │   └── screenshots/               ← real screenshots from a TV
@@ -167,7 +168,9 @@ glass-tv-launcher/
 │       │   ├── index.html         ← screens: home, all apps, favorites, bloatware, settings, options sheet
 │       │   ├── style.css          ← glass styling and layout
 │       │   ├── app.js             ← navigation, favorites, now-playing cards, settings
-│       │   └── config.js          ← pinned apps and row size
+│       │   ├── config.js          ← pinned apps and row size
+│       │   ├── fonts/             ← Inter (variable), SIL OFL
+│       │   └── img/logo-mark.svg  ← Red Star Standard mark
 │       ├── java/com/glasstv/launcher/
 │       │   ├── MainActivity.kt    ← WebView host, remote keys, default-launcher request
 │       │   ├── LauncherBridge.kt  ← app list, launch, uninstall, media sessions, settings shortcuts
@@ -176,6 +179,12 @@ glass-tv-launcher/
 ├── build.gradle.kts · settings.gradle.kts · gradle/ · gradlew(.bat)
 └── README.md
 ```
+
+## About Red Star Standard
+
+Hearth is built and maintained by [Red Star Standard](https://redstarstandard.co.ke), an AI consultancy and AI-driven software team. Product page and downloads: <https://redstarstandard.co.ke/tv-launcher>. Support and custom builds: consultancy@redstarstandard.co.ke.
+
+The interface follows the Red Star Standard brand system: brand navy `#013480`, action red `#C41930`, the Inter typeface and the star mark. The Inter font is licensed under the SIL Open Font License (`app/src/main/assets/fonts/OFL.txt`).
 
 ## Known limits
 
