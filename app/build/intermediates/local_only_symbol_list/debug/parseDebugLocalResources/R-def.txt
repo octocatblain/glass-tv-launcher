@@ -4,4 +4,7 @@ color bg
 drawable banner
 drawable ic_launcher
 string app_name
+string key_service_desc
+string key_service_label
 style Theme.GlassTV
+xml key_service

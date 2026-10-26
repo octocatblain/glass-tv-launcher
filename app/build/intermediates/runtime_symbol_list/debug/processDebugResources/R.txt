@@ -2,4 +2,7 @@ int color bg 0x7f010000
 int drawable banner 0x7f020001
 int drawable ic_launcher 0x7f020002
 int string app_name 0x7f030000
+int string key_service_desc 0x7f030001
+int string key_service_label 0x7f030002
 int style Theme_GlassTV 0x7f040000
+int xml key_service 0x7f050000

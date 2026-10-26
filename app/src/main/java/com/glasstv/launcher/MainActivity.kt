@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
@@ -22,6 +23,8 @@ import android.webkit.WebViewClient
 class MainActivity : Activity() {
 
     private lateinit var web: WebView
+    private lateinit var idle: IdleController
+    private lateinit var weather: Weather
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,8 +63,23 @@ class MainActivity : Activity() {
             web,
             ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         )
+        idle = IdleController(this)
+        weather = Weather(this)
         web.loadUrl("file:///android_asset/index.html")
         web.post { requestDefaultLauncher() }
+    }
+
+    /** Methods called from the page through LauncherBridge. */
+    fun setIdleMinutes(minutes: Int) {
+        idle.setIdleMinutes(minutes)
+    }
+
+    fun setScreenSaverEnabled(enabled: Boolean) {
+        idle.setScreenSaverEnabled(enabled)
+    }
+
+    fun requestWeather(lat: String, lon: String, place: String, units: String) {
+        weather.request(lat, lon, place, units)
     }
 
     /**
@@ -105,19 +123,54 @@ class MainActivity : Activity() {
             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     }
 
-    fun runJs(js: String) {
-        runOnUiThread { web.evaluateJavascript(js, null) }
+        fun runJs(js: String) {
+        runOnUiThread {
+            try {
+                web.evaluateJavascript(js, null)
+            } catch (_: Exception) {
+                // The page or WebView has already gone away (for example, during shutdown).
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        idle.onResume()
         runJs("window.onResumeLauncher&&window.onResumeLauncher()")
+    }
+
+    override fun onPause() {
+        idle.onPause()
+        super.onPause()
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (idle.isScreenSaverActive()) {
+            // Any remote key wakes the ambient saver without also activating UI underneath.
+            idle.onUserInput()
+            return true
+        }
+        idle.onUserInput()
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (idle.isScreenSaverActive()) {
+            idle.onUserInput()
+            return true
+        }
+        idle.onUserInput()
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.hasCategory(Intent.CATEGORY_HOME)) {
             runJs("window.goHome&&window.goHome()")
+        }
+        if (intent.getBooleanExtra(EXTRA_QSET, false)) {
+            intent.removeExtra(EXTRA_QSET)
+            runJs("window.openQset&&window.openQset()")
         }
     }
 
@@ -127,11 +180,11 @@ class MainActivity : Activity() {
                 runJs("window.onBack&&window.onBack()")
                 return true
             }
-            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO -> {
+            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_SETTINGS -> {
                 runJs("window.onMenu&&window.onMenu()")
                 return true
             }
-            KeyEvent.KEYCODE_SEARCH,KeyEvent.KEYCODE_VOICE_ASSIST -> {
+            KeyEvent.KEYCODE_SEARCH, KeyEvent.KEYCODE_VOICE_ASSIST -> {
                 runJs("window.onVoiceSearch&&window.onVoiceSearch()")
                 return true
             }
@@ -139,7 +192,12 @@ class MainActivity : Activity() {
         return super.onKeyDown(keyCode, event)
     }
 
+    companion object {
+        const val EXTRA_QSET = "open_quick_settings"
+    }
+
     override fun onDestroy() {
+        idle.onDestroy()
         web.destroy()
         super.onDestroy()
     }

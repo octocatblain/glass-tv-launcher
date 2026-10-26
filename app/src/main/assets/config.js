@@ -17,5 +17,20 @@ window.CONFIG = {
   ],
 
   // How many apps appear on the home row (a final "All apps" tile is added after them).
-  homeRowCount: 5
+  homeRowCount: 5,
+
+  // The launcher only goes idle when no music is playing and there has been no remote
+  // input for this many minutes. With the Screen saver setting on, idle shows the ambient
+  // clock/weather screen; with it off, the TV is allowed to dim or sleep.
+  idleMinutes: 15,
+
+  // Weather panel below the now-playing cards (current hour and the next two hours).
+  // Leave lat/lon null to find the TV's rough position from its public IP address. Set
+  // both to pin a location, and use units "c" for Celsius or "f" for Fahrenheit.
+  weather: {
+    lat: null,
+    lon: null,
+    place: "",
+    units: "c"
+  }
 };

@@ -6,6 +6,11 @@
                 {
                     "source": "C:\\Users\\blain\\OneDrive\\Desktop\\glass-tv-launcher\\app\\src\\main\\res\\values\\colors.xml",
                     "from": {
+                        "startLines": "-1",
+                        "startColumns": "-1",
+                        "startOffsets": "-1"
+                    },
+                    "to": {
                         "startLines": "2",
                         "startColumns": "4",
                         "startOffsets": "55",
@@ -21,29 +26,29 @@
                         "startOffsets": "-1"
                     },
                     "to": {
-                        "startLines": "4",
+                        "startLines": "6",
                         "startColumns": "4",
-                        "startOffsets": "147",
-                        "endLines": "9",
+                        "startOffsets": "351",
+                        "endLines": "11",
                         "endColumns": "12",
-                        "endOffsets": "484"
+                        "endOffsets": "688"
                     }
                 },
                 {
                     "source": "C:\\Users\\blain\\OneDrive\\Desktop\\glass-tv-launcher\\app\\src\\main\\res\\values\\strings.xml",
                     "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "54",
-                        "endOffsets": "105"
+                        "startLines": "-1,4,3",
+                        "startColumns": "-1,4,4",
+                        "startOffsets": "-1,165,99",
+                        "endColumns": "-1,148,65",
+                        "endOffsets": "-1,309,160"
                     },
                     "to": {
-                        "startLines": "3",
-                        "startColumns": "4",
-                        "startOffsets": "92",
-                        "endColumns": "54",
-                        "endOffsets": "142"
+                        "startLines": "3,4,5",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "92,136,285",
+                        "endColumns": "43,148,65",
+                        "endOffsets": "131,280,346"
                     }
                 }
             ]
@@ -74,29 +79,29 @@
                         "startOffsets": "-1"
                     },
                     "to": {
-                        "startLines": "4",
+                        "startLines": "6",
                         "startColumns": "4",
-                        "startOffsets": "136",
-                        "endLines": "9",
+                        "startOffsets": "379",
+                        "endLines": "11",
                         "endColumns": "12",
-                        "endOffsets": "473"
+                        "endOffsets": "716"
                     }
                 },
                 {
                     "source": "C:\\Users\\blain\\OneDrive\\Desktop\\glass-tv-launcher\\app\\src\\main\\res\\values\\strings.xml",
                     "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "43",
-                        "endOffsets": "94"
+                        "startLines": "-1,4,-1",
+                        "startColumns": "-1,4,-1",
+                        "startOffsets": "-1,165,-1",
+                        "endColumns": "-1,176,-1",
+                        "endOffsets": "-1,337,-1"
                     },
                     "to": {
-                        "startLines": "3",
-                        "startColumns": "4",
-                        "startOffsets": "92",
-                        "endColumns": "43",
-                        "endOffsets": "131"
+                        "startLines": "3,4,5",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "92,136,313",
+                        "endColumns": "43,176,65",
+                        "endOffsets": "131,308,374"
                     }
                 }
             ]

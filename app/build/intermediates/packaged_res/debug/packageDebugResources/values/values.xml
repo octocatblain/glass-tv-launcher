@@ -2,6 +2,8 @@
 <resources>
     <color name="bg">#010F28</color>
     <string name="app_name">Hearth</string>
+    <string name="key_service_desc">Lets the remote Settings button open the Hearth quick settings sidebar instead of the TV Settings app. It does not read the screen.</string>
+    <string name="key_service_label">Hearth Settings key</string>
     <style name="Theme.GlassTV" parent="android:Theme.DeviceDefault.NoActionBar">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@color/bg</item>

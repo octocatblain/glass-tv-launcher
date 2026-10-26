@@ -1,4 +1,7 @@
+com.glasstv.launcher:xml/key_service = 0x7f050000
 com.glasstv.launcher:style/Theme.GlassTV = 0x7f040000
+com.glasstv.launcher:string/key_service_label = 0x7f030002
+com.glasstv.launcher:string/key_service_desc = 0x7f030001
 com.glasstv.launcher:color/bg = 0x7f010000
 com.glasstv.launcher:drawable/$ic_launcher__0 = 0x7f020000
 com.glasstv.launcher:string/app_name = 0x7f030000

@@ -1,15 +1,19 @@
 [
     {
-        "merged": "com.glasstv.launcher.app-debug-4:/drawable-xhdpi_banner.png.flat",
-        "source": "com.glasstv.launcher.app-main-6:/drawable-xhdpi/banner.png"
-    },
-    {
         "merged": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-debug-4:\\drawable_ic_launcher.xml.flat",
         "source": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-main-6:\\drawable\\ic_launcher.xml"
     },
     {
+        "merged": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-debug-4:\\xml_key_service.xml.flat",
+        "source": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-main-6:\\xml\\key_service.xml"
+    },
+    {
         "merged": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-debug-4:\\drawable_banner.xml.flat",
         "source": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-main-6:\\drawable\\banner.xml"
+    },
+    {
+        "merged": "com.glasstv.launcher.app-debug-4:/xml_key_service.xml.flat",
+        "source": "com.glasstv.launcher.app-main-6:/xml/key_service.xml"
     },
     {
         "merged": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-debug-4:\\drawable-xhdpi_banner.png.flat",

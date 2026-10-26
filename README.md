@@ -6,33 +6,50 @@
 *A [Red Star Standard](https://redstarstandard.co.ke) product.*
 
 [![Download APK](https://img.shields.io/badge/Download-APK-C41930?style=for-the-badge&logo=android&logoColor=white)](https://github.com/octocatblain/glass-tv-launcher/raw/main/dist/Hearth.apk)
+[![Downloads](https://img.shields.io/github/downloads/octocatblain/glass-tv-launcher/total?style=for-the-badge&label=Downloads&color=6A4BFF)](https://github.com/octocatblain/glass-tv-launcher/releases)
 ![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-013480?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-1.1-013480?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.5-013480?style=for-the-badge)
 
 <img src="docs/mockup.png" alt="Hearth on a TV" width="900">
 
 </div>
 
-> **Direct link:** [`dist/Hearth.apk`](dist/Hearth.apk) (about 850 KB). This is a debug-signed build for sideloading; it is not on the Play Store.
+> **Download count:** the badge above is the total number of times the APK has been downloaded from this repository's [Releases](https://github.com/octocatblain/glass-tv-launcher/releases) page (GitHub counts release assets only). Attach `dist/Hearth.apk` to a release to start counting.
+>
+> **Direct link:** [`dist/Hearth.apk`](dist/Hearth.apk) (about 1.1 MB). This is a debug-signed build for sideloading; it is not on the Play Store.
 
 ## Features
 
-- **Red Star Standard design**: navy and red brand palette, Inter typeface, frosted glass surfaces over soft colour glows, and a white-and-red focus ring that is easy to follow from the sofa. A **Glass effects** switch turns the blur off if your TV is slow.
-- **Favorite apps row**: your most-used apps as round icons. Add, remove and reorder them from **Settings → Manage favorites** or with the options menu on any app.
-- **Now-playing cards**: Spotify, Netflix and YouTube show what is playing or paused, with cover art. When nothing is playing, each card keeps showing the **last thing you played** in that app.
-- **All apps** grid and **Pre-installed apps** screen for finding and removing bloatware.
-- **App options menu**: press **Menu**/**Info**, or hold **OK**, on any app to open, add or remove it from favorites, move it, uninstall or disable it, or open its App info.
-- **Settings**: shortcuts to Android's Network, Display, Sound, Apps, Accessibility and Privacy screens, plus launcher options (screen size, edge margin for overscan, glass effects, 24-hour clock).
-- **Voice search** button and remote Search key.
+### Home screen
+- **Cinematic hero**: a photo backdrop that changes with the **time of day** (morning, afternoon, evening, night), with a handwritten **Good Evening**-style greeting and a blue swoosh underline.
+- **Clock and date** at the top right, with the settings button beside them, and a **voice search** mic at the top left.
+- **Weather card**: current condition and temperature plus the next two hours, from Open-Meteo. The location comes from the TV's public IP address, or can be pinned in `config.js`.
+- **Continue Watching** cards for **Spotify, Netflix and YouTube**: title, cover art and a progress bar where the app exposes it, with a Playing, Paused or Recent badge. When a session ends, the card keeps the last thing seen.
+- **Favorite Apps row**: round icons you choose, add, remove and reorder from **Settings → Manage favorites** or the app options menu.
+
+### Quick settings sidebar
+- Press the remote's **Settings** button (see [Settings button](#settings-button)) or **Menu** to slide in a sidebar with the date and time, a **gear** that opens Android's full settings, and one-press shortcuts for **Bluetooth, Wi-Fi, Display, Sound and Screensaver**.
+- A **Notifications** section lists recent notifications from other apps. Press OK on one to open its app and dismiss it, or choose **Clear all**. It needs Now playing access (see below).
+
+![Quick settings sidebar](docs/screenshots/quick-settings.png)
+
+### Always-on behaviour
+- **Stays awake for music**: while media is playing, the launcher keeps the TV's screensaver away. The TV only counts as idle after **nothing has played and the remote has been untouched for 15 minutes** (configurable).
+- **Ambient screen saver**: a slowly drifting clock-and-weather screen that keeps the display on. Any remote button wakes it.
+
+### Apps and settings
+- **All apps** grid, a **Pre-installed apps** screen for finding and removing bloatware, and an **app options** menu (open, favorite, move, uninstall or disable, app info).
+- **Launcher settings**: screen size, edge margin for overscan, glass effects switch, 24-hour clock, screen saver switch, plus shortcuts to Network, Display, Sound, Apps, Accessibility and Privacy.
+- **Red Star Standard design**: navy and red palette with a violet accent, **Inter** and **Caveat** typefaces, frosted glass over soft colour glows, and a white-and-red focus ring that is easy to follow from the sofa.
 - No third-party libraries: Kotlin plus a WebView that renders the HTML/CSS/JS UI in `assets/`.
 
 ## Screenshots
 
-| Home | App options |
+| Home | Quick settings |
 | :---: | :---: |
-| <img src="docs/screenshots/home.png" alt="Home screen" width="440"> | <img src="docs/screenshots/app-options.png" alt="App options menu" width="440"> |
-| **Settings** | **Manage favorites** |
-| <img src="docs/screenshots/settings.png" alt="Settings" width="440"> | <img src="docs/screenshots/favorites.png" alt="Manage favorites" width="440"> |
+| <img src="docs/screenshots/home.png" alt="Home screen" width="440"> | <img src="docs/screenshots/quick-settings.png" alt="Quick settings sidebar" width="440"> |
+| **Settings** | **Screen saver** |
+| <img src="docs/screenshots/settings.png" alt="Settings" width="440"> | <img src="docs/screenshots/saver.png" alt="Ambient screen saver" width="440"> |
 
 ## Installation
 
@@ -99,13 +116,23 @@ Android only shares what is playing with apps you allow.
 
 The service never reads your notifications; it only exists to unlock media sessions.
 
+## Settings button
+
+Many TVs (TCL among them) handle the remote's **Settings** key in firmware and open their own Settings app before any launcher sees it. Hearth ships a tiny accessibility service, **Hearth Settings key**, that catches only that key so it can open the quick settings sidebar. It reads no screen content.
+
+1. In the launcher: **Settings → Settings button shortcut** (opens Android's Accessibility settings), then turn on **Hearth Settings key**; or
+2. Over ADB: `adb shell settings put secure enabled_accessibility_services com.glasstv.launcher/com.glasstv.launcher.KeyService` and `adb shell settings put secure accessibility_enabled 1`.
+
+Without it, the **Menu** key still opens the sidebar on every TV, and the Settings key works as-is on TVs that pass it to the launcher.
+
 ## Using it
 
 | Remote | Action |
 | --- | --- |
 | **D-pad** | Move between apps and settings |
 | **OK** | Open the selected app or setting |
-| **Hold OK** or **Menu / Info** | App options: open, favorite, move, uninstall or disable, app info |
+| **Settings** (or **Menu**) | Quick settings sidebar |
+| **Hold OK** on an app | App options: open, favorite, move, uninstall or disable, app info |
 | **Back** | Close a menu or go back to Home |
 | **Search / voice button** | Voice search |
 
@@ -122,6 +149,19 @@ The service never reads your notifications; it only exists to unlock media sessi
 
 - Core apps (Settings, Play Store, the TV input and system services) are hidden from that list because removing them can break the TV.
 
+## Weather, idling and the screen saver
+
+The weather card at the top right shows the **current hour and the next two hours**: a large current condition with temperature, then the hour-by-hour strip. The current hour's strip cell is subtly highlighted. Weather comes from [Open-Meteo](https://open-meteo.com/) and needs an internet connection but no API key. The launcher finds the TV's rough position from its public IP address; to pin a location instead, set `weather.lat`/`weather.lon` in `config.js`.
+
+The launcher stays awake while music or other media is playing, even if nobody touches the remote and the Home screen is just sitting there. Concretely:
+
+- **Music playing** → the launcher holds the screen on, so the Google TV screensaver/Daydream no longer covers the Home screen mid-song.
+- **No music and no remote input for 15 minutes** → the launcher is idle. With **Settings → Screen saver** on (the default), the ambient screen saver fades in and keeps the display on. With it off, the launcher releases the screen and the TV can dim, dream or sleep normally.
+- Any remote key or touch dismisses the screen saver; the 15 minutes start when the music stops, not when the last button was pressed.
+- Music detection uses Android's music audio stream, so it works without **Now playing access**. Change the timeout with `idleMinutes` in `config.js`.
+
+![Hearth ambient screen saver](docs/screenshots/saver.png)
+
 ## Customizing
 
 Edit `app/src/main/assets/config.js`, then rebuild:
@@ -129,11 +169,20 @@ Edit `app/src/main/assets/config.js`, then rebuild:
 ```js
 window.CONFIG = {
   pinned: ["com.spotify.tv.android", "com.netflix.ninja", /* ... */], // shown first, in this order
-  homeRowCount: 5                                                      // favorites when you have not edited them
+  homeRowCount: 5,      // favorites when you have not edited them
+
+  idleMinutes: 15,      // no music + no remote input for this long before idle/ambient saver
+
+  weather: {
+    lat: null,          // null: locate the TV by its public IP address
+    lon: null,          // or set lat/lon to pin a location, e.g. -1.2921 / 36.8219
+    place: "",          // label in the weather card, e.g. "Nairobi"; blank uses the detected city
+    units: "c"          // "c" for Celsius, "f" for Fahrenheit
+  }
 };
 ```
 
-Your own favorites, edited in the launcher, take priority over `pinned`. Other files: `style.css` (look and layout on a fixed 1920×1080 stage that scales to your screen), `app.js` (behaviour and navigation), `LauncherBridge.kt` (apps, launching, uninstalling, media sessions).
+Your own favorites, edited in the launcher, take priority over `pinned`. The screen saver is toggled in **Settings → Screen saver**; `idleMinutes` controls when it appears. Other files: `style.css` (look and layout on a fixed 1920×1080 stage that scales to your screen), `app.js` (behaviour, navigation, media cards, weather and ambient saver UI), `LauncherBridge.kt` (apps, launching, uninstalling, media sessions), `Weather.kt` (forecast and IP lookup) and `IdleController.kt` (idle detection and screen-saver timing).
 
 **Preview without a TV**: open `app/src/main/assets/index.html` in Chrome and use the arrow keys, Enter and Esc. It uses demo data when it is not running inside the app.
 
@@ -165,16 +214,19 @@ glass-tv-launcher/
 │   └── src/main/
 │       ├── AndroidManifest.xml    ← home + TV launcher intents, permissions
 │       ├── assets/                ← the whole UI
-│       │   ├── index.html         ← screens: home, all apps, favorites, bloatware, settings, options sheet
-│       │   ├── style.css          ← glass styling and layout
-│       │   ├── app.js             ← navigation, favorites, now-playing cards, settings
-│       │   ├── config.js          ← pinned apps and row size
-│       │   ├── fonts/             ← Inter (variable), SIL OFL
-│       │   └── img/logo-mark.svg  ← Red Star Standard mark
+│       │   ├── index.html         ← screens: home, all apps, favorites, bloatware, settings, options sheet, saver
+│       │   ├── style.css          ← glass styling, cinematic hero, weather card and ambient saver
+│       │   ├── app.js             ← navigation, favorites, media cards, weather, saver, settings
+│       │   ├── config.js          ← pinned apps, row size, idle timeout, weather
+│       │   ├── fonts/             ← Inter + Caveat, SIL OFL
+│       │   └── img/               ← logo mark and time-of-day hero photographs
 │       ├── java/com/glasstv/launcher/
 │       │   ├── MainActivity.kt    ← WebView host, remote keys, default-launcher request
 │       │   ├── LauncherBridge.kt  ← app list, launch, uninstall, media sessions, settings shortcuts
-│       │   └── MediaListener.kt   ← notification listener that unlocks media sessions
+│       │   ├── IdleController.kt  ← music-aware idle detection and ambient screen-saver timing
+│       │   ├── Weather.kt         ← IP location + Open-Meteo hourly forecast
+│       │   ├── MediaListener.kt   ← notification listener: media sessions and sidebar notifications
+│       │   └── KeyService.kt      ← accessibility service that catches the remote Settings key
 │       └── res/                   ← app icon, TV banner, theme, colours
 ├── build.gradle.kts · settings.gradle.kts · gradle/ · gradlew(.bat)
 └── README.md
@@ -184,11 +236,16 @@ glass-tv-launcher/
 
 Hearth is built and maintained by [Red Star Standard](https://redstarstandard.co.ke), an AI consultancy and AI-driven software team. Product page and downloads: <https://redstarstandard.co.ke/tv-launcher>. Support and custom builds: consultancy@redstarstandard.co.ke.
 
-The interface follows the Red Star Standard brand system: brand navy `#013480`, action red `#C41930`, the Inter typeface and the star mark. The Inter font is licensed under the SIL Open Font License (`app/src/main/assets/fonts/OFL.txt`).
+The interface follows the Red Star Standard brand system: brand navy `#013480`, action red `#C41930`, an evening violet accent, the Inter and Caveat typefaces, and the star mark. Inter is licensed under the SIL Open Font License (`app/src/main/assets/fonts/OFL.txt`); Caveat is licensed under the SIL Open Font License (`app/src/main/assets/fonts/OFL-Caveat.txt`). The hero photograph is the supplied product reference artwork.
 
 ## Known limits
 
 - The APK is **debug-signed**, so it installs by sideloading only. To update, install the newer APK over it (`adb install -r`); it keeps your settings.
-- Android only exposes the item that is *currently active* in an app. The now-playing cards therefore remember the last thing the launcher saw. They cannot show watch history or "continue watching" rows, and opening a card opens the app, not the specific song or video.
+- Android only exposes the item that is *currently active* in an app. The Continue Watching cards therefore remember the last thing the launcher saw. They cannot show a complete watch history, and opening a card opens the app, not the specific song or video.
+- **Netflix** (tested with 13.2.1 on Android TV) publishes a media session with a playback state but **no title or artwork**, and Android gives no app access to your Netflix account or its profiles (for example "blain"), so the launcher cannot read your watch history. Where the TV publishes a **Watch Next** row (Google TV home), the Netflix card shows the latest entry from it; otherwise it shows "Playing/Paused on Netflix" or "Recently played". Spotify and YouTube expose full metadata.
+- The notification list shows only what other apps currently have posted, skips ongoing background-service notices, and needs Now playing access.
 - Glass blur can be heavy on budget TV hardware. If it feels slow, switch off **Settings → Glass effects**.
+- Weather needs an internet connection. IP-based location is approximate (usually the city), so pin `weather.lat`/`weather.lon` if the forecast is for the wrong place. No API key is needed.
+- The ambient screen saver keeps the display on while it is showing. If you would rather let the TV dim or sleep after 15 idle minutes, turn **Settings → Screen saver** off.
+- The awake logic keeps Hearth's own window on while media is playing on the music stream. When you open another app, that app owns the screen and its own keep-awake behaviour.
 - The Google TV recommendations and Watch Next feed are not included.

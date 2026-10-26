@@ -21,6 +21,40 @@
       { pkg: 'com.tcl.demo.bloat', label: 'TCL Demo App', icon: '', system: true }
     ];
     const toastMock = (m) => showToast(m);
+    const pad = (n) => (n < 10 ? '0' : '') + n;
+    // Demo hourly forecast for the preview: temperatures that peak in the afternoon and a
+    // rotating set of conditions, always relative to the hour you open the page.
+    const demoWeather = (place, units) => {
+      const start = new Date();
+      start.setMinutes(0, 0, 0);
+      start.setHours(start.getHours() - 25);
+      const time = [];
+      const temp = [];
+      const code = [];
+      const precip = [];
+      for (let i = 0; i < 73; i++) {
+        const d = new Date(start.getTime() + i * 3600000);
+        const h = d.getHours();
+        time.push(d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(h) + ':00');
+        temp.push(Math.round(18 + 8 * Math.sin((h - 8) / 24 * Math.PI * 2)));
+        code.push([0, 1, 2, 3, 61, 80][Math.floor(i / 10) % 6]);
+        precip.push((i * 13) % 70);
+      }
+      const now = new Date();
+      return {
+        place: place || 'Nairobi',
+        units: units === 'f' ? 'f' : 'c',
+        fetchedAt: Date.now(),
+        stale: false,
+        current: {
+          time: now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+            'T' + pad(now.getHours()) + ':' + pad(now.getMinutes()),
+          temperature_2m: temp[25],
+          weather_code: code[25]
+        },
+        hourly: { time, temperature_2m: temp, weather_code: code, precipitation_probability: precip }
+      };
+    };
     return {
       requestApps() { setTimeout(() => window.onApps(JSON.stringify(demo)), 50); },
       launch(p) { toastMock('Would launch ' + p); },
@@ -30,10 +64,16 @@
       openSystem(k) { toastMock('Would open system settings: ' + k); },
       openNotificationAccess() { toastMock('Would open notification access'); },
       hasNotificationAccess() { return true; },
+      isInstalled(p) { return ['com.spotify.tv.android', 'com.netflix.ninja', 'com.google.android.youtube.tv'].indexOf(p) >= 0; },
+      setIdleMinutes() { /* native only */ },
+      setScreenSaverEnabled() { /* native only */ },
+      requestWeather(lat, lon, place, units) {
+        setTimeout(() => window.onWeather && window.onWeather(JSON.stringify(demoWeather(place, units))), 80);
+      },
       nowPlayingAll() {
         return JSON.stringify([
-          { pkg: 'com.spotify.tv.android', title: 'Blinding Lights', subtitle: 'The Weeknd', state: 'playing', artKey: 'a' },
-          { pkg: 'com.google.android.youtube.tv', title: 'Northern Lights 4K', subtitle: 'Nature Channel', state: 'paused', artKey: 'b' }
+          { pkg: 'com.spotify.tv.android', title: 'Blinding Lights', subtitle: 'The Weeknd', state: 'playing', artKey: 'a', progress: 0.55 },
+          { pkg: 'com.google.android.youtube.tv', title: 'Northern Lights 4K', subtitle: 'Nature Channel', state: 'paused', artKey: 'b', progress: 0.35 }
         ]);
       },
       artFor() { return ''; }
@@ -45,7 +85,7 @@
    * ------------------------------------------------------------------------- */
   const SCALES = [80, 85, 90, 95, 100, 105, 110];
   const MARGINS = [0, 2, 3, 4, 5];
-  const defaults = { clock24: false, scale: 100, margin: 0, favs: null, glass: true };
+  const defaults = { clock24: false, scale: 100, margin: 0, favs: null, glass: true, saver: true };
   let S = Object.assign({}, defaults);
   try { Object.assign(S, JSON.parse(localStorage.getItem('glass.settings') || '{}')); } catch (e) { /* first run */ }
   const save = () => { try { localStorage.setItem('glass.settings', JSON.stringify(S)); } catch (e) { /* ignore */ } };
@@ -71,28 +111,244 @@
   fit();
 
   function applySettings() {
-    $('#app-version').textContent = 'v' + (Native.version ? Native.version() : '1.1');
+    $('#app-version').textContent = 'v' + (Native.version ? Native.version() : '1.5');
     $('#scale-val').textContent = S.scale + '%';
     $('#margin-val').textContent = S.margin ? S.margin + '%' : 'Off';
     document.body.classList.toggle('flat', !S.glass);
     $$('[data-action="toggle"]').forEach((b) => b.setAttribute('aria-pressed', String(!!S[b.dataset.key])));
+    if (Native.setScreenSaverEnabled) Native.setScreenSaverEnabled(!!S.saver);
+    if (!S.saver) hideSaver();
     fit();
     tick();
+    renderWeather();
   }
 
   /* ---------------------------------------------------------------------------
    * Clock + greeting
    * ------------------------------------------------------------------------- */
+  const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
   function tick() {
     const d = new Date();
-    const t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: !S.clock24 });
+    const t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: !S.clock24 }).toLowerCase();
     const h = d.getHours();
     $('#clock-time').textContent = t;
-    $('#clock-date').textContent = d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
-    $('#greeting').textContent = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+    $('#clock-date').textContent = WEEKDAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+    const greeting = h < 5 ? 'Good Night' : h < 12 ? 'Good Morning' : h < 18 ? 'Good Afternoon' : 'Good Evening';
+    $('#greeting').textContent = greeting.replace(' ', '\n');
+    const timeOfDay = h < 5 ? 'night' : h < 12 ? 'morning' : h < 17 ? 'afternoon' : h < 21 ? 'evening' : 'night';
+    const heroCard = $('#hero-card');
+    if (heroCard) heroCard.className = 'hero ' + timeOfDay;
     $$('[data-clock]').forEach((e) => { e.textContent = t; });
   }
   setInterval(tick, 20000);
+
+  /* ---------------------------------------------------------------------------
+   * Weather: the current hour and the next two hours, under the now-playing
+   * cards. The native side finds the position (IP lookup), fetches Open-Meteo
+   * and calls window.onWeather(json). config.js can override the position/units.
+   * ------------------------------------------------------------------------- */
+  const WX_REFRESH_MS = 15 * 60 * 1000;
+  const pad2 = (n) => (n < 10 ? '0' : '') + n;
+  let wx = null;
+  let wxAt = 0;
+  let wxTimer;
+
+  const WX_ICON = {
+    clear: '<circle cx="12" cy="12" r="4.1"/><path d="M12 2.4v2.1M12 19.5v2.1M4.5 12H2.4M21.6 12h-2.1M6.9 6.9 5.4 5.4M18.6 18.6l-1.5-1.5M17.1 6.9l1.5-1.5M5.4 18.6l1.5-1.5"/>',
+    partly: '<circle cx="8.6" cy="8.3" r="3"/><path d="M8.6 2.6v1.5M2.7 8.3h1.5M4.4 4.1l1.1 1.1M12.8 4.1l-1.1 1.1"/><path d="M9.2 19.4h7.9a3.4 3.4 0 0 0 .4-6.7 4.6 4.6 0 0 0-8.9 1.2 2.9 2.9 0 0 0 .6 5.5z"/>',
+    cloudy: '<path d="M7.4 18.5h9.2a3.7 3.7 0 0 0 .4-7.4 5.1 5.1 0 0 0-9.8 1.3 3.1 3.1 0 0 0 .2 6.1z"/>',
+    fog: '<path d="M4 9.5h10M7.5 13h13M4 16.5h11M9 20h8"/>',
+    drizzle: '<path d="M7.4 15.5h9.2a3.7 3.7 0 0 0 .4-7.4 5.1 5.1 0 0 0-9.8 1.3 3.1 3.1 0 0 0 .2 6.1z"/><path d="M9 18.3l-.6 1.9M14 18.3l-.6 1.9"/>',
+    rain: '<path d="M7.4 15.5h9.2a3.7 3.7 0 0 0 .4-7.4 5.1 5.1 0 0 0-9.8 1.3 3.1 3.1 0 0 0 .2 6.1z"/><path d="M8 18l-.8 3M12.5 18l-.8 3M17 18l-.8 3"/>',
+    snow: '<path d="M7.4 15.5h9.2a3.7 3.7 0 0 0 .4-7.4 5.1 5.1 0 0 0-9.8 1.3 3.1 3.1 0 0 0 .2 6.1z"/><circle cx="8" cy="19.3" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="21" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="19.3" r="1" fill="currentColor" stroke="none"/>',
+    storm: '<path d="M7.4 14.5h9.2a3.7 3.7 0 0 0 .4-7.4 5.1 5.1 0 0 0-9.8 1.3 3.1 3.1 0 0 0 .2 6.1z"/><path d="M12.6 16.6 10 20h3l-1.5 3"/>'
+  };
+  const WX_TEXT = {
+    clear: 'Clear', partly: 'Partly cloudy', cloudy: 'Cloudy', fog: 'Fog',
+    drizzle: 'Drizzle', rain: 'Rain', snow: 'Snow', storm: 'Thunderstorm'
+  };
+
+  // WMO weather codes used by Open-Meteo: https://open-meteo.com/en/docs
+  function wxKind(code) {
+    if (code === 0) return 'clear';
+    if (code <= 2) return 'partly';
+    if (code === 3) return 'cloudy';
+    if (code === 45 || code === 48) return 'fog';
+    if (code >= 51 && code <= 57) return 'drizzle';
+    if (code >= 61 && code <= 67) return 'rain';
+    if (code >= 71 && code <= 77) return 'snow';
+    if (code >= 80 && code <= 82) return 'rain';
+    if (code === 85 || code === 86) return 'snow';
+    if (code >= 95) return 'storm';
+    return 'cloudy';
+  }
+
+  function wxSvg(code, size) {
+    const s = size || 30;
+    return '<svg aria-hidden="true" width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+      WX_ICON[wxKind(code)] + '</svg>';
+  }
+
+  function wxHourLabel(timeStr) {
+    const h = parseInt(String(timeStr).slice(11, 13), 10);
+    if (isNaN(h)) return '';
+    if (S.clock24) return pad2(h) + ':00';
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return h12 + (h < 12 ? ' AM' : ' PM');
+  }
+
+  // The current hour, using the weather service's clock, plus a temperature/condition
+  // snapshot for the big card and the screen saver.
+  function currentWeather() {
+    if (!wx || !wx.hourly || !Array.isArray(wx.hourly.time) ||
+      !Array.isArray(wx.hourly.temperature_2m)) return null;
+    const times = wx.hourly.time;
+    const temps = wx.hourly.temperature_2m;
+    const codes = Array.isArray(wx.hourly.weather_code) ? wx.hourly.weather_code : [];
+
+    let key;
+    if (wx.current && typeof wx.current.time === 'string' && wx.current.time.length >= 13) {
+      key = wx.current.time.slice(0, 13) + ':00';
+    } else {
+      const d = new Date();
+      key = d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) +
+        'T' + pad2(d.getHours()) + ':00';
+    }
+    let idx = times.indexOf(key);
+    if (idx < 0) {
+      // ISO timestamps sort lexicographically; fall back to the last hour at or before now.
+      for (let i = 0; i < times.length; i++) if (times[i] <= key) idx = i;
+    }
+    if (idx < 0) idx = 0;
+
+    let temp = temps[idx];
+    let code = codes[idx];
+    if (wx.current) {
+      if (typeof wx.current.temperature_2m === 'number') temp = wx.current.temperature_2m;
+      if (typeof wx.current.weather_code === 'number') code = wx.current.weather_code;
+    }
+    if (typeof temp !== 'number') return null;
+    if (typeof code !== 'number') code = 3;
+    return {
+      idx,
+      temp,
+      code,
+      desc: WX_TEXT[wxKind(code)],
+      place: wx.place || 'Nearby',
+      unit: wx.units === 'f' ? '°F' : '°C'
+    };
+  }
+
+  function renderWeather() {
+    const box = $('#weather');
+    if (!box) return;
+    const now = currentWeather();
+    if (!now) { box.hidden = true; return; }
+    const times = wx.hourly.time;
+    const temps = wx.hourly.temperature_2m;
+    const codes = Array.isArray(wx.hourly.weather_code) ? wx.hourly.weather_code : [];
+
+    $('#wx-current-icon').innerHTML = wxSvg(now.code, 78);
+    $('#wx-current-temp').textContent = Math.round(now.temp) + '°';
+    $('#wx-current-desc').textContent = now.desc;
+    $('#wx-place').textContent = now.place;
+    $('#wx-unit').textContent = now.unit;
+
+    const order = [now.idx, now.idx + 1, now.idx + 2]
+      .filter((i) => i >= 0 && i < times.length && typeof temps[i] === 'number');
+    $('#wx-hours').innerHTML = order.map((i) => {
+      const isNow = i === now.idx;
+      const temp = Math.round(temps[i]);
+      const code = typeof codes[i] === 'number' ? codes[i] : 3;
+      const hour = wxHourLabel(times[i]);
+      const label = WX_TEXT[wxKind(code)];
+      return '<div class="wx-hour' + (isNow ? ' now' : '') + '" role="group" ' +
+        'aria-label="' + hour + ', ' + label + ', ' + temp + now.unit + '">' +
+        '<b>' + hour + '</b>' +
+        '<span class="wx-hi">' + wxSvg(code, 30) + '</span>' +
+        '<span class="wx-ht">' + temp + '°</span></div>';
+    }).join('');
+
+    box.classList.toggle('stale', !!wx.stale);
+    box.hidden = false;
+  }
+
+  function loadWeather() {
+    clearTimeout(wxTimer);
+    if (!Native.requestWeather) return;
+    const w = C.weather || {};
+    try {
+      Native.requestWeather(
+        w.lat == null ? '' : String(w.lat),
+        w.lon == null ? '' : String(w.lon),
+        w.place == null ? '' : String(w.place),
+        String(w.units || 'c')
+      );
+    } catch (e) { /* preview or an older bridge */ }
+    wxTimer = setTimeout(loadWeather, WX_REFRESH_MS);
+  }
+
+  window.onWeather = (json) => {
+    try { wx = JSON.parse(json); } catch (e) { wx = null; }
+    wxAt = Date.now();
+    renderWeather();
+    clearTimeout(wxTimer);
+    wxTimer = setTimeout(loadWeather, WX_REFRESH_MS);
+  };
+  window.onWeatherError = () => {
+    // Keep the last good forecast on screen, and retry soon instead of at the normal interval.
+    clearTimeout(wxTimer);
+    wxTimer = setTimeout(loadWeather, 2 * 60 * 1000);
+  };
+
+  /* ---------------------------------------------------------------------------
+   * Ambient screen saver: a slow, burn-in friendly clock/weather screen shown when
+   * IdleController reports that nothing is playing and nobody touched the remote.
+   * ------------------------------------------------------------------------- */
+  let saverVisible = false;
+  let saverDismissedAt = 0;
+  let saverTimer;
+
+  function updateSaver() {
+    const d = new Date();
+    $('#saver-time').textContent =
+      d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: !S.clock24 }).toLowerCase();
+    $('#saver-date').textContent =
+      d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    const now = currentWeather();
+    const box = $('#saver-weather');
+    if (now) {
+      box.hidden = false;
+      $('#saver-wx-icon').innerHTML = wxSvg(now.code, 52);
+      $('#saver-wx-temp').textContent = Math.round(now.temp) + '°';
+      $('#saver-wx-desc').textContent = now.desc + ' · ' + now.place;
+    } else {
+      box.hidden = true;
+    }
+  }
+
+  function showSaver() {
+    if (saverVisible || !S.saver) return;
+    saverVisible = true;
+    updateSaver();
+    $('#saver').hidden = false;
+    clearInterval(saverTimer);
+    saverTimer = setInterval(updateSaver, 1000);
+  }
+
+  function hideSaver() {
+    if (!saverVisible) return;
+    saverVisible = false;
+    saverDismissedAt = Date.now();
+    $('#saver').hidden = true;
+    clearInterval(saverTimer);
+  }
+
+  window.dismissScreensaver = hideSaver;
+  window.onIdleChange = (idle) => { if (idle) showSaver(); else hideSaver(); };
 
   /* ---------------------------------------------------------------------------
    * Toast
@@ -117,6 +373,7 @@
     if (!el) return;
     el.focus({ preventScroll: true });
     try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* old WebView */ }
+    const st = document.getElementById('stage'); if (st) { st.scrollLeft = 0; st.scrollTop = 0; }
   }
 
   function show(name) {
@@ -196,6 +453,7 @@
   }
 
   function menuForFocused() {
+    if (saverVisible) { hideSaver(); return true; }
     const el = document.activeElement;
     if (!el || !el.dataset || !el.dataset.pkg || sheetOpen()) return false;
     openSheet(el.dataset.pkg);
@@ -203,17 +461,98 @@
   }
   window.onMenu = menuForFocused;
 
+  const qsetOpen = () => !$('#qset').hidden;
+
+  // Notifications shown in the quick settings sidebar (needs Notification access).
+  function renderNotifs() {
+    const box = $('#qset-notifs');
+    let list = [];
+    try { list = JSON.parse(Native.notifications ? Native.notifications() : '[]'); } catch (e) { list = []; }
+    box.textContent = '';
+    $('#qset-clear').hidden = !list.length;
+    if (!list.length) {
+      const e = document.createElement('div');
+      e.className = 'qset-empty';
+      let access = false;
+      try { access = Native.hasNotificationAccess(); } catch (x) { /* preview */ }
+      e.textContent = access ? 'You are all caught up' : 'Allow Now playing access in Settings to see notifications here';
+      box.appendChild(e);
+      return;
+    }
+    list.forEach((n) => {
+      const b = document.createElement('button');
+      b.className = 'qset-n';
+      b.setAttribute('data-f', '');
+      b.dataset.action = 'qsetNotif';
+      b.dataset.key = n.key;
+      b.dataset.pkg = n.pkg;
+      const ic = document.createElement('span');
+      ic.className = 'ni';
+      if (n.icon) ic.style.backgroundImage = 'url("data:image/png;base64,' + n.icon + '")';
+      else ic.textContent = (n.app || '?').charAt(0);
+      const t = document.createElement('span');
+      t.className = 'nt';
+      const sm = document.createElement('small'); sm.textContent = n.app;
+      const ti = document.createElement('b'); ti.textContent = n.title || n.app;
+      t.append(sm, ti);
+      if (n.text) { const tx = document.createElement('span'); tx.textContent = n.text; t.appendChild(tx); }
+      b.append(ic, t);
+      box.appendChild(b);
+    });
+  }
+
+  function openQset() {
+    if (saverVisible) { hideSaver(); return; }
+    if (sheetOpen()) closeSheet();
+    const el = $('#qset');
+    if (!el.hidden) return;
+    const d = new Date();
+    $('#qset-time').textContent = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: !S.clock24 }).toLowerCase();
+    $('#qset-date').textContent = WEEKDAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+    renderNotifs();
+    el.hidden = false;
+    focusEl($('.qset-tile', el));
+  }
+  window.openQset = openQset;
+  function closeQset() { $('#qset').hidden = true; }
+
+  window.onMenu = () => {
+    if (saverVisible) { hideSaver(); return true; }
+    if (qsetOpen()) { closeQset(); return true; }
+    openQset();
+    return true;
+  };
+
   function onBack() {
+    if (saverVisible) { hideSaver(); return; }
+    if (qsetOpen()) { $('#qset').hidden = true; return; }
     if (sheetOpen()) { closeSheet(); return; }
     if (screen !== 'home') show('home');
   }
   window.onBack = onBack;
-  window.goHome = () => show('home');
-  window.onVoiceSearch = () => Native.openVoiceSearch();
+  window.goHome = () => { if (saverVisible) { hideSaver(); return; } if (qsetOpen()) { $('#qset').hidden = true; return; } show('home'); };
+  window.onVoiceSearch = () => {
+    if (saverVisible) { hideSaver(); return; }
+    Native.openVoiceSearch();
+  };
+
+  // The hero's primary action: open whatever medium was most recently active.
+  function continueWatching() {
+    for (const m of MEDIA_BRANDS) {
+      const ses = brandSession(m);
+      if (ses) { Native.launch(ses.pkg); return; }
+    }
+    for (const m of MEDIA_BRANDS) {
+      if (!last[m.key]) continue;
+      const pkg = brandInstalled(m) || (m.pkgs && m.pkgs[0]) || '';
+      if (pkg) { Native.launch(pkg); return; }
+    }
+    showToast('Nothing to continue yet');
+  }
 
   /* Spatial D-pad navigation: move to the nearest focusable element in the pressed direction. */
   function move(dir) {
-    const scope = sheetOpen() ? $('#sheet') : $('.screen.active');
+    const scope = qsetOpen() ? $('#qset') : (sheetOpen() ? $('#sheet') : $('.screen.active'));
     const cur = document.activeElement && document.activeElement.matches('[data-f]') ? document.activeElement : null;
     const els = $$('[data-f]', scope).filter(visible);
     if (!cur) { focusEl(els[0]); return; }
@@ -241,6 +580,13 @@
 
   let userMoved = false;
   addEventListener('keydown', (e) => {
+    // A key that wakes the ambient saver must not also move focus underneath it.
+    if (saverVisible || Date.now() - saverDismissedAt < 400) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (saverVisible) hideSaver();
+      return;
+    }
     userMoved = true;
     const map ={ ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
     if (map[e.key]) { e.preventDefault(); move(map[e.key]); }
@@ -289,8 +635,25 @@
       case 'sheetRemove': if (sheetPkg) Native.uninstall(sheetPkg); break;
       case 'screen': show(d.to); break;
       case 'back': show('home'); break;
+      case 'continue': continueWatching(); break;
       case 'launch': Native.launch(d.pkg); break;
       case 'voiceSearch': Native.openVoiceSearch(); break;
+      case 'qsetClear': try { Native.clearNotifications(); } catch (x) { /* preview */ } renderNotifs(); focusEl($('.qset-tile', $('#qset'))); break;
+      case 'qsetNotif': {
+        const k = d.key, p = d.pkg;
+        try { Native.dismissNotification(k); } catch (x) { /* preview */ }
+        closeQset();
+        if (p) Native.launch(p);
+        break;
+      }
+      case 'qsetSaver':
+        $('#qset').hidden = true;
+        showSaver();
+        break;
+      case 'qsetSystem':
+        $('#qset').hidden = true;
+        Native.openSystem(d.kind);
+        break;
       case 'system': Native.openSystem(d.kind); break;
       case 'access': Native.openNotificationAccess(); break;
       case 'scale': S.scale = cycle(SCALES, S.scale); save(); applySettings(); break;
@@ -387,9 +750,8 @@
 
     const row = $('#apps-row');
     row.innerHTML = '';
-    home.forEach((a, i) => {
+    home.forEach((a) => {
       const tile = appTile(a);
-      if (i === 0) tile.setAttribute('data-default', '');
       row.appendChild(tile);
     });
     row.appendChild(allAppsTile());
@@ -431,13 +793,45 @@
    * so a card shows "Nothing playing" until something has been started there.
    * ------------------------------------------------------------------------- */
   const MEDIA_BRANDS = [
-    { key: 'spotify', name: 'Spotify' },
-    { key: 'netflix', name: 'Netflix' },
-    { key: 'youtube', name: 'YouTube' }
+    { key: 'spotify', name: 'Spotify', pkgs: ['com.spotify.tv.android', 'com.spotify.music'] },
+    { key: 'netflix', name: 'Netflix', pkgs: ['com.netflix.ninja', 'com.netflix.mediaclient'] },
+    { key: 'youtube', name: 'YouTube', pkgs: ['com.google.android.youtube.tv', 'com.google.android.youtube'] }
   ];
   let sessions = [];
   const artCache = {};
   const mediaCards = {};
+  const lower = (v) => String(v || '').toLowerCase();
+
+  // Prefer the exact TV package, then fall back to any package/label containing the brand
+  // name (for sideloaded builds with a different package id).
+  function brandApp(m) {
+    for (const p of (m.pkgs || [])) {
+      const a = APPS.find((x) => x.pkg === p);
+      if (a) return a;
+    }
+    return APPS.find((a) => lower(a.pkg + ' ' + a.label).includes(m.key)) || null;
+  }
+
+  function brandSession(m) {
+    for (const p of (m.pkgs || [])) {
+      const s = sessions.find((x) => x.pkg === p);
+      if (s) return s;
+    }
+    return sessions.find((s) => lower(s.pkg).includes(m.key)) || null;
+  }
+
+  // Cached package checks, so the three cards can say "not installed" even on a TV whose
+  // launcher does not expose that app icon.
+  const installCache = {};
+  function brandInstalled(m) {
+    for (const p of (m.pkgs || [])) {
+      if (installCache[p] === undefined) {
+        try { installCache[p] = !!Native.isInstalled(p); } catch (e) { installCache[p] = false; }
+      }
+      if (installCache[p]) return p;
+    }
+    return '';
+  }
 
   // The last track/video seen in each app. Android only exposes what is currently active, so the
   // launcher remembers it and keeps showing it after the app's media session has gone away.
@@ -454,6 +848,16 @@
     }
   } catch (e) { /* storage unavailable */ }
 
+  // Netflix puts no title in its media session, so ask the TV's Watch Next provider what it last
+  // played (only present where the TV publishes one). Cached to keep the 4 s poll cheap.
+  let wnCache = { at: 0, v: null };
+  function netflixWatchNext(pkg) {
+    if (Date.now() - wnCache.at < 60000) return wnCache.v;
+    wnCache.at = Date.now();
+    try { const r = Native.watchNext ? Native.watchNext(pkg) : ''; wnCache.v = r ? JSON.parse(r) : null; } catch (e) { wnCache.v = null; }
+    return wnCache.v;
+  }
+
   function pollSessions() {
     try { sessions = JSON.parse(Native.nowPlayingAll()); } catch (e) { sessions = []; }
     sessions.forEach((s) => {
@@ -462,13 +866,29 @@
     });
     let changed = false;
     MEDIA_BRANDS.forEach((m) => {
-      const ses = sessions.find((s) => s.pkg.toLowerCase().includes(m.key));
-      if (!ses || !ses.title) return;
+      const ses = brandSession(m);
+      if (m.key === 'netflix' && !(ses && ses.title)) {
+        const wn = netflixWatchNext(m.pkgs[0]);
+        if (wn && wn.title) {
+          const rec = { title: wn.title, subtitle: wn.subtitle || '', art: wn.art || '', artUrl: wn.artUrl || '', progress: wn.progress || 0 };
+          if (JSON.stringify(last.netflix) !== JSON.stringify(rec)) { last.netflix = rec; changed = true; }
+          if (ses) return;
+        }
+      }
+      if (!ses) return;
       const prev = last[m.key] || {};
+      if (m.key === 'netflix' && !ses.title && prev.title && prev.title !== 'Recently played') { last.netflix = Object.assign({}, prev, { progress: ses.progress || prev.progress || 0 }); return; }
       const art = (artCache[ses.pkg] && artCache[ses.pkg].art) || (prev.title === ses.title ? prev.art : '') || '';
-      if (prev.title === ses.title && prev.subtitle === (ses.subtitle || '') && prev.art === art) return;
-      last[m.key] = { title: ses.title, subtitle: ses.subtitle || '', art };
-      changed = true;
+      // Netflix (and a few other players) expose a playback state but no metadata. Remember
+      // that something played without pretending to know its name.
+      const record = ses.title
+        ? { title: ses.title, subtitle: ses.subtitle || '', art, progress: ses.progress || 0 }
+        : { title: 'Recently played', subtitle: 'Press OK to open', art, progress: ses.progress || 0 };
+      // Progress changes constantly, so only write localStorage when the title/art changes.
+      const changedContent = prev.title !== record.title || prev.subtitle !== record.subtitle ||
+        prev.art !== record.art;
+      last[m.key] = record;
+      if (changedContent) changed = true;
     });
     if (changed) saveLast();
     renderMedia();
@@ -478,23 +898,28 @@
     const row = $('#media-row');
     const hasAccess = Native.hasNotificationAccess();
     MEDIA_BRANDS.forEach((m) => {
-      const terms = m.match || [m.key];
-      const hay = (a) => ((a.pkg || '') + ' ' + (a.label || '')).toLowerCase();
-      // Terms are in priority order, so the first term that matches an installed app wins.
-      let app = null;
-      for (const t of terms) { app = APPS.find((a) => hay(a).includes(t)); if (app) break; }
-      const ses = sessions.find((s) => terms.some((t) => s.pkg.toLowerCase().includes(t)));
+      let app = brandApp(m);
+      const ses = brandSession(m);
+      const rec = !ses ? last[m.key] : null;
+      const installedPkg = app ? app.pkg : brandInstalled(m);
+      const installed = !!app || !!installedPkg;
       let card = mediaCards[m.key];
-      if (!app && !ses) { if (card) { card.remove(); delete mediaCards[m.key]; } return; }
+      // Always keep the three brand cards; a missing app is reported rather than hiding the
+      // card, so the row does not jump between one and three cards.
+      if (!app) {
+        app = { pkg: (ses && ses.pkg) || installedPkg || (m.pkgs && m.pkgs[0]) || '', label: m.name, icon: '' };
+      }
       if (!card) {
         card = document.createElement('button');
         card.className = 'mcard glass';
         card.setAttribute('data-f', '');
         card.dataset.action = 'launch';
         card.dataset.brand = m.key;
-        card.innerHTML = '<span class="m-top"><span class="m-ico"></span><span class="m-app"></span>' +
+        card.innerHTML = '<span class="m-top"><span class="m-ico"></span>' +
           '<span class="m-state"><span class="m-eq"><i></i><i></i><i></i></span><b></b></span></span>' +
-          '<span class="m-body"><span class="m-title"></span><span class="m-sub"></span></span>';
+          '<span class="m-body"><span class="m-title"></span><span class="m-sub"></span></span>' +
+          '<span class="m-foot">' +
+          '<span class="m-progress"><i></i></span></span>';
         mediaCards[m.key] = card;
       }
       // Keep a stable order: Spotify, Netflix, YouTube.
@@ -504,23 +929,32 @@
       card.dataset.pkg = (ses && ses.pkg) || app.pkg;
       card.dataset.label = m.name;
       const ico = $('.m-ico', card);
-      const src = app && app.icon ? 'url("data:image/png;base64,' + app.icon + '")' : '';
+      const src = app.icon ? 'url("data:image/png;base64,' + app.icon + '")' : '';
       if (ico.style.backgroundImage !== src) ico.style.backgroundImage = src;
       ico.textContent = src ? '' : m.name.charAt(0);
-      $('.m-app', card).textContent = m.name;
       // Live session wins; otherwise fall back to the last thing played in that app.
-      const rec = !ses ? last[m.key] : null;
-      const art = ses ? (artCache[ses.pkg] ? artCache[ses.pkg].art : '') : (rec ? rec.art : '');
-      const bg = art ? 'url("data:image/jpeg;base64,' + art + '")' : '';
+      const keep = m.key === 'netflix' && ses && !ses.title ? last.netflix : null; // live Netflix session without a title
+      const art = ses ? (artCache[ses.pkg] ? artCache[ses.pkg].art : '') || (keep ? keep.art : '') : (rec ? rec.art : '');
+      const artUrl = (rec || keep || {}).artUrl || '';
+      const bg = art ? 'url("data:image/jpeg;base64,' + art + '")' : (artUrl ? 'url("' + artUrl + '")' : '');
       if (card.style.backgroundImage !== bg) card.style.backgroundImage = bg;
+      const progress = ses ? (typeof ses.progress === 'number' ? ses.progress : 0)
+        : (rec && typeof rec.progress === 'number' ? rec.progress : 0);
+      $('.m-progress i', card).style.width = Math.round(Math.max(0, Math.min(1, progress)) * 100) + '%';
       card.classList.toggle('idle', !ses && !rec);
       card.classList.toggle('recent', !!rec);
       card.classList.toggle('is-playing', !!ses && ses.state === 'playing');
       $('.m-state', card).hidden = !ses && !rec;
       if (ses) {
-        $('.m-state b', card).textContent = ses.state === 'playing' ? 'Playing' : 'Paused';
-        $('.m-title', card).textContent = ses.title || 'Playing';
-        $('.m-sub', card).textContent = ses.subtitle || '';
+        const stateWord = ses.state === 'playing' ? 'Playing' : 'Paused';
+        $('.m-state b', card).textContent = stateWord;
+        // Netflix publishes no title/art in its media session, so show a useful state rather
+        // than a blank card. Other apps still show their real track/video title.
+        $('.m-title', card).textContent = ses.title || (keep && keep.title !== 'Recently played' ? keep.title : stateWord + ' on ' + m.name);
+        $('.m-sub', card).textContent = ses.subtitle || (ses.title ? '' : (keep && keep.title !== 'Recently played' ? stateWord + ' on ' + m.name : 'Press OK to open'));
+      } else if (!installed) {
+        $('.m-title', card).textContent = 'Not installed';
+        $('.m-sub', card).textContent = 'Install ' + m.name + ' to use this card';
       } else if (rec) {
         $('.m-state b', card).textContent = 'Recent';
         $('.m-title', card).textContent = rec.title;
@@ -551,10 +985,16 @@
     Native.requestApps();
     poll();
     refreshAccess();
+    // Catch up on the weather after the launcher has been in the background for a while.
+    if (!wx || Date.now() - wxAt > 10 * 60 * 1000) loadWeather();
   };
 
   applySettings();
   show('home');
+  if (location.hash === '#saver') showSaver();
+  const idleMinutes = Math.round(Number(C.idleMinutes));
+  if (Native.setIdleMinutes) Native.setIdleMinutes(idleMinutes > 0 ? idleMinutes : 15);
+  loadWeather();
   Native.requestApps();
   poll();
 })();

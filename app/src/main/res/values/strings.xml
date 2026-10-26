@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hearth</string>
+    <string name="key_service_label">Hearth Settings key</string>
+    <string name="key_service_desc">Lets the remote Settings button open the Hearth quick settings sidebar instead of the TV Settings app. It does not read the screen.</string>
 </resources>

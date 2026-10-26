@@ -12,34 +12,67 @@
   <div class="orb o1"></div>
   <div class="orb o2"></div>
   <div class="orb o3"></div>
+  <div class="orb o4"></div>
   <!-- ============================== HOME ============================== -->
   <section id="home" class="screen active">
-    <!-- One row: what's playing in Spotify, Netflix and YouTube (filled by app.js) -->
-    <div class="media-row" id="media-row"></div>
-
     <header class="top">
-      <div class="clock"><span id="clock-time">9:41</span><span id="clock-date">Tue, Oct 24</span></div>
+      <button class="round glass" data-f data-action="voiceSearch" aria-label="Voice Search">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"></path><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"></path></svg>
+      </button>
       <div class="top-right">
-        <button class="search-btn glass" data-f data-action="voiceSearch" aria-label="Voice Search">
-          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"></path><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"></path></svg>
-          <span>Search</span>
-        </button>
+        <div class="clock">
+          <span id="clock-time">7:29 pm</span>
+          <span id="clock-date">Mon, 26 Oct</span>
+        </div>
         <button class="round glass" data-f data-action="screen" data-to="settings" aria-label="Settings">
-          <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"></path></svg>
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"></path></svg>
         </button>
       </div>
     </header>
 
-    <div class="hero">
-      <h1 id="greeting">Good evening</h1>
-      <p>Pick up where you left off.</p>
+    <div class="hero-row">
+      <div class="hero" id="hero-card">
+        <span class="hero-rule" aria-hidden="true"></span>
+        <h1 id="greeting">Good Evening</h1>
+        <p>Sit back, relax and enjoy your favorite content.</p>
+      </div>
+
+      <!-- Weather for the current hour and the next two (filled by app.js) -->
+      <div class="weather-slot">
+        <div class="weather glass" id="weather" hidden>
+        <div class="wx-head">
+          <span class="wx-place">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+            <span id="wx-place">Nairobi</span>
+          </span>
+          <span class="wx-meta">
+            <span class="wx-unit" id="wx-unit">°C</span>
+            <span class="wx-next">Next 3 hours
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+            </span>
+          </span>
+        </div>
+        <div class="wx-current">
+          <span class="wx-current-icon" id="wx-current-icon"></span>
+          <div class="wx-current-copy">
+            <b id="wx-current-temp">21°</b>
+            <span id="wx-current-desc">Drizzle</span>
+          </div>
+        </div>
+        <div class="wx-hours" id="wx-hours"></div>
+      </div>
+      </div>
     </div>
 
     <div class="sec">
-      <div class="sec-head">
-        <span class="sec-label">Favorite Apps</span>
-        <span class="sec-sub">OK to launch · hold OK or press Menu for options</span>
-      </div>
+      <div class="sec-head"><span class="sec-label">Continue Watching
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+      </span></div>
+      <div class="media-row" id="media-row"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="sec-label">Favorite Apps</span></div>
       <div class="row" id="apps-row"></div>
     </div>
   </section>
@@ -164,6 +197,11 @@
           <span class="switch"><i></i></span>
         </button>
 
+        <button class="srow" data-f data-action="toggle" data-key="saver" aria-pressed="true">
+          <span class="st"><span class="sl">Screen saver</span><span class="sd">Ambient clock and weather after 15 minutes without music or input</span></span>
+          <span class="switch"><i></i></span>
+        </button>
+
         <button class="srow" data-f data-action="screen" data-to="favs">
           <span class="st"><span class="sl">Manage favorites</span><span class="sd">Choose which apps appear on the home row</span></span>
           <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
@@ -177,6 +215,11 @@
         <button class="srow" data-f data-action="access">
           <span class="st"><span class="sl">Now playing access</span><span class="sd">Lets the launcher show what is playing</span></span>
           <span class="sv" id="access-status">Off</span>
+        </button>
+
+        <button class="srow" data-f data-action="system" data-kind="accessibility">
+          <span class="st"><span class="sl">Settings button shortcut</span><span class="sd">Turn on Hearth Settings key so the remote's Settings button opens quick settings</span></span>
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
         </button>
 
         <button class="srow" data-f data-action="system" data-kind="home">
@@ -202,6 +245,77 @@
       <button class="srow" data-f data-action="sheetInfo"><span class="sl">App info</span></button>
       <button class="srow" data-f data-action="sheetClose"><span class="sl">Cancel</span></button>
       <span class="sd sheet-note" id="sheet-note"></span>
+    </div>
+  </div>
+
+  <!-- Quick Settings sidebar (Google TV style): opened by the remote's Settings key -->
+  <div id="qset" class="qset-back" hidden>
+    <aside class="qset-panel" role="dialog" aria-label="Quick settings">
+      <div class="qset-head">
+        <div class="qset-when">
+          <div class="qset-time" id="qset-time">7:29 pm</div>
+          <div class="qset-date" id="qset-date">Mon, 26 Oct</div>
+        </div>
+        <button class="round glass" data-f data-action="qsetSystem" data-kind="all" aria-label="All settings">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"></path></svg>
+        </button>
+      </div>
+
+      <div class="qset-label">Quick settings</div>
+      <div class="qset-grid">
+        <button class="qset-tile" data-f data-action="qsetSystem" data-kind="bluetooth">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 7.5l11 9L12 21V3l5.5 4.5-11 9"></path></svg>
+          <span>Bluetooth</span>
+        </button>
+        <button class="qset-tile" data-f data-action="qsetSystem" data-kind="network">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.8a15 15 0 0120 0M5.5 12.4a10 10 0 0113 0M9 16a5 5 0 016 0"></path><circle cx="12" cy="19.6" r="0.9" fill="#fff"></circle></svg>
+          <span>Wi-Fi</span>
+        </button>
+        <button class="qset-tile" data-f data-action="qsetSystem" data-kind="display">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8M12 16v4"></path></svg>
+          <span>Display</span>
+        </button>
+        <button class="qset-tile" data-f data-action="qsetSystem" data-kind="sound">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"></path></svg>
+          <span>Sound</span>
+        </button>
+        <button class="qset-tile" data-f data-action="qsetSaver">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"></path></svg>
+          <span>Screensaver</span>
+        </button>
+        <button class="qset-tile" data-f data-action="screen" data-to="settings">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle></svg>
+          <span>Hearth</span>
+        </button>
+      </div>
+
+      <div class="qset-label qset-nhead">Notifications <button class="qset-clear" data-f data-action="qsetClear" id="qset-clear" hidden>Clear all</button></div>
+      <div class="qset-notifs" id="qset-notifs"></div>
+    </aside>
+  </div>
+
+  <!-- Ambient screen saver: shown after 15 minutes with no music or remote input -->
+  <div id="saver" class="saver" hidden aria-hidden="true">
+    <div class="saver-orb s1"></div>
+    <div class="saver-orb s2"></div>
+    <div class="saver-orb s3"></div>
+    <div class="saver-inner">
+      <span class="saver-line" aria-hidden="true"></span>
+      <div class="saver-clock">
+        <span id="saver-time">7:29 pm</span>
+        <span id="saver-date">Monday, 26 October</span>
+      </div>
+      <div class="saver-weather" id="saver-weather">
+        <span class="saver-wx-icon" id="saver-wx-icon"></span>
+        <div class="saver-wx-copy">
+          <b id="saver-wx-temp">21°</b>
+          <span id="saver-wx-desc">Drizzle · Nairobi</span>
+        </div>
+      </div>
+    </div>
+    <div class="saver-foot">
+      <span class="saver-brand"><img src="img/logo-mark.svg" alt=""> Hearth</span>
+      <span class="saver-hint">Press any button to wake</span>
     </div>
   </div>
 

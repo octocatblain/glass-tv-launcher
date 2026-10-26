@@ -79,6 +79,19 @@ class LauncherBridge(private val activity: MainActivity) {
         ""
     }
 
+    /**
+     * True when a package is installed, even if Android does not expose a launcher activity
+     * for it (some TV builds hide the Netflix/Spotify icons). The media cards use this to tell
+     * "not installed" apart from "the app list has not loaded yet".
+     */
+    @JavascriptInterface
+    fun isInstalled(pkg: String): Boolean = try {
+        pm.getPackageInfo(pkg, 0)
+        true
+    } catch (_: Exception) {
+        false
+    }
+
     // ---- Removing apps ------------------------------------------------------------------
 
     /**
@@ -169,6 +182,7 @@ class LauncherBridge(private val activity: MainActivity) {
             "sound" -> Settings.ACTION_SOUND_SETTINGS
             "apps" -> Settings.ACTION_APPLICATION_SETTINGS
             "accessibility" -> Settings.ACTION_ACCESSIBILITY_SETTINGS
+            "bluetooth" -> Settings.ACTION_BLUETOOTH_SETTINGS
             "privacy" -> Settings.ACTION_PRIVACY_SETTINGS
             "home" -> Settings.ACTION_HOME_SETTINGS
             else -> Settings.ACTION_SETTINGS
@@ -190,6 +204,7 @@ class LauncherBridge(private val activity: MainActivity) {
 
     /** startActivity is safe to call from the bridge thread; returns whether something opened. */
     private fun startSettings(action: String, fallbackToAll: Boolean): Boolean {
+        KeyService.lastOwnOpen = System.currentTimeMillis()
         return try {
             activity.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             true
@@ -207,6 +222,26 @@ class LauncherBridge(private val activity: MainActivity) {
         }
     }
 
+    // ---- Home screen behaviour -----------------------------------------------------------
+
+    /** config.js idleMinutes: how long the launcher waits before letting the TV go idle. */
+    @JavascriptInterface
+    fun setIdleMinutes(minutes: Int) {
+        activity.setIdleMinutes(minutes)
+    }
+
+    /** Settings > Screen saver. When off, idle lets the TV sleep instead of showing ambient mode. */
+    @JavascriptInterface
+    fun setScreenSaverEnabled(enabled: Boolean) {
+        activity.setScreenSaverEnabled(enabled)
+    }
+
+    /** Hourly weather for the home header; answers with window.onWeather(json). */
+    @JavascriptInterface
+    fun requestWeather(lat: String, lon: String, place: String, units: String) {
+        activity.requestWeather(lat, lon, place, units)
+    }
+
     // ---- Now playing (reads other apps' media sessions) -------------------------------------
 
     @JavascriptInterface
@@ -219,18 +254,28 @@ class LauncherBridge(private val activity: MainActivity) {
         for (mc in sessions()) {
             val md = mc.metadata
             val ps = mc.playbackState
+            val state = ps?.state ?: PlaybackState.STATE_NONE
+            // Ignore sessions that are merely alive (for example Netflix keeps one after you
+            // leave it) so the card falls back to "recent" instead of claiming it is paused.
+            if (state != PlaybackState.STATE_PLAYING && state != PlaybackState.STATE_BUFFERING &&
+                state != PlaybackState.STATE_PAUSED) continue
             val title = md?.getString(MediaMetadata.METADATA_KEY_TITLE)
                 ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE) ?: ""
-            if (title.isEmpty() && ps == null) continue
             val subtitle = md?.getString(MediaMetadata.METADATA_KEY_ARTIST)
                 ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE)
                 ?: md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
+            val duration = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L
+            val position = ps?.position ?: 0L
+            val progress = if (duration > 0L) {
+                (position.toDouble() / duration).coerceIn(0.0, 1.0)
+            } else 0.0
             val o = JSONObject()
             o.put("pkg", mc.packageName)
             o.put("title", title)
             o.put("subtitle", subtitle)
-            o.put("state", if (ps?.state == PlaybackState.STATE_PLAYING ||
-                ps?.state == PlaybackState.STATE_BUFFERING) "playing" else "paused")
+            o.put("progress", progress)
+            o.put("state", if (state == PlaybackState.STATE_PLAYING ||
+                state == PlaybackState.STATE_BUFFERING) "playing" else "paused")
             o.put("artKey", mc.packageName + "|" + title)
             arr.put(o)
         }
@@ -253,6 +298,94 @@ class LauncherBridge(private val activity: MainActivity) {
         scaled.compress(Bitmap.CompressFormat.JPEG, 80, out)
         return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
     }
+
+    // ---- Notifications (quick settings sidebar) ----------------------------------------------
+
+    /** Active notifications from other apps, newest first. Empty without Notification access. */
+    @JavascriptInterface
+    fun notifications(): String {
+        val arr = JSONArray()
+        val svc = MediaListener.instance ?: return arr.toString()
+        val list = try { svc.activeNotifications } catch (_: Exception) { null } ?: return arr.toString()
+        for (sbn in list.sortedByDescending { it.postTime }) {
+            if (sbn.packageName == activity.packageName) continue
+            val n = sbn.notification
+            if ((n.flags and (android.app.Notification.FLAG_GROUP_SUMMARY or android.app.Notification.FLAG_ONGOING_EVENT)) != 0) continue // skips background-service noise
+            if (n.extras.containsKey("android.mediaSession")) continue // now-playing is already on the home cards
+            val title = n.extras.getCharSequence(android.app.Notification.EXTRA_TITLE)?.toString() ?: ""
+            val text = n.extras.getCharSequence(android.app.Notification.EXTRA_TEXT)?.toString() ?: ""
+            if (title.isEmpty() && text.isEmpty()) continue
+            val app = try {
+                pm.getApplicationLabel(pm.getApplicationInfo(sbn.packageName, 0)).toString()
+            } catch (_: Exception) { sbn.packageName }
+            val o = JSONObject()
+            o.put("key", sbn.key)
+            o.put("pkg", sbn.packageName)
+            o.put("app", app)
+            o.put("title", title)
+            o.put("text", text)
+            try {
+                o.put("icon", encodePng(pm.getApplicationIcon(sbn.packageName), 96))
+            } catch (_: Exception) {
+                o.put("icon", "")
+            }
+            arr.put(o)
+            if (arr.length() >= 12) break
+        }
+        return arr.toString()
+    }
+
+    @JavascriptInterface
+    fun dismissNotification(key: String) {
+        try { MediaListener.instance?.cancelNotification(key) } catch (_: Exception) {}
+    }
+
+    @JavascriptInterface
+    fun clearNotifications() {
+        try { MediaListener.instance?.cancelAllNotifications() } catch (_: Exception) {}
+    }
+
+    // ---- Watch Next (what an app says you were last watching) -----------------------------------
+
+    /**
+     * Most recent Watch Next entry the given app published to the TV provider, as
+     * {title, subtitle, progress, art, artUrl}, or "" when there is none or the TV has no provider.
+     * Netflix publishes here on devices with a Google TV home; its media session has no title.
+     */
+    @JavascriptInterface
+    fun watchNext(pkg: String): String {
+        return try {
+            val uri = Uri.parse("content://android.media.tv/watch_next_program")
+            val cols = arrayOf("title", "short_description", "poster_art_uri", "duration_millis",
+                "last_playback_position_millis", "last_engagement_time_utc_millis")
+            activity.contentResolver.query(uri, cols, "package_name=?", arrayOf(pkg),
+                "last_engagement_time_utc_millis DESC")?.use { c ->
+                if (!c.moveToFirst()) return ""
+                val o = JSONObject()
+                o.put("title", c.getString(0) ?: "")
+                o.put("subtitle", c.getString(1) ?: "")
+                val dur = c.getLong(3)
+                o.put("progress", if (dur > 0) (c.getLong(4).toDouble() / dur).coerceIn(0.0, 1.0) else 0.0)
+                val art = c.getString(2) ?: ""
+                o.put("artUrl", if (art.startsWith("http")) art else "")
+                o.put("art", if (art.startsWith("content:")) encodeUri(Uri.parse(art)) else "")
+                o.toString()
+            } ?: ""
+        } catch (_: Exception) {
+            ""
+        }
+    }
+
+    private fun encodeUri(uri: Uri): String = try {
+        activity.contentResolver.openInputStream(uri)?.use { ins ->
+            val bmp = android.graphics.BitmapFactory.decodeStream(ins) ?: return ""
+            val w = 360
+            val scaled = if (bmp.width > w) Bitmap.createScaledBitmap(bmp, w, (bmp.height * w.toFloat() / bmp.width).toInt().coerceAtLeast(1), true) else bmp
+            val out = ByteArrayOutputStream()
+            scaled.compress(Bitmap.CompressFormat.JPEG, 80, out)
+            Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
+        } ?: ""
+    } catch (_: Exception) { "" }
 
     // ---- helpers ------------------------------------------------------------------------
 
