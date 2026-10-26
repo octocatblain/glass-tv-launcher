@@ -28,8 +28,10 @@
 - **Favorite Apps row**: round icons you choose, add, remove and reorder from **Settings → Manage favorites** or the app options menu.
 
 ### Quick settings sidebar
-- Press the remote's **Settings** button (see [Settings button](#settings-button)) or **Menu** to slide in a sidebar with the date and time, a **gear** that opens Android's full settings, and one-press shortcuts for **Bluetooth, Wi-Fi, Display, Sound and Screensaver**.
+- Press the remote's **Settings** button to slide in a sidebar with the date and time, a **gear** for Android's full settings, and one-press tiles for **Bluetooth, Wi-Fi, Display, Sound and Screensaver**, plus a **Hearth** tile for the launcher's own settings. **Menu** opens the same sidebar on any TV.
+- It works **over other apps**: press Settings inside Spotify or YouTube and the sidebar appears on top of that app, which stays visible behind it. Press Settings again, or Back, to close it.
 - A **Notifications** section lists recent notifications from other apps. Press OK on one to open its app and dismiss it, or choose **Clear all**. It needs Now playing access (see below).
+- Over other apps this needs a one-time setup on some TVs, see [Settings button](#settings-button).
 
 ![Quick settings sidebar](docs/screenshots/quick-settings.png)
 
@@ -48,8 +50,10 @@
 | Home | Quick settings |
 | :---: | :---: |
 | <img src="docs/screenshots/home.png" alt="Home screen" width="440"> | <img src="docs/screenshots/quick-settings.png" alt="Quick settings sidebar" width="440"> |
-| **Settings** | **Screen saver** |
-| <img src="docs/screenshots/settings.png" alt="Settings" width="440"> | <img src="docs/screenshots/saver.png" alt="Ambient screen saver" width="440"> |
+| **Settings** | **Manage favorites** |
+| <img src="docs/screenshots/settings.png" alt="Settings" width="440"> | <img src="docs/screenshots/favorites.png" alt="Manage favorites" width="440"> |
+| **App options** | **Screen saver** |
+| <img src="docs/screenshots/app-options.png" alt="App options menu" width="440"> | <img src="docs/screenshots/saver.png" alt="Ambient screen saver" width="440"> |
 
 ## Installation
 
@@ -118,12 +122,26 @@ The service never reads your notifications; it only exists to unlock media sessi
 
 ## Settings button
 
-Many TVs (TCL among them) handle the remote's **Settings** key in firmware and open their own Settings app before any launcher sees it. Hearth ships a tiny accessibility service, **Hearth Settings key**, that catches only that key so it can open the quick settings sidebar. It reads no screen content.
+Inside the launcher, **Menu** and the remote's Settings button open the quick settings sidebar by themselves. On many TVs they do not reach the launcher while another app is open, and some firmware (TCL, for one) launches its own Settings app, or ignores the key. Hearth ships a small accessibility service, **Hearth Settings key**, that fills the gap:
 
-1. In the launcher: **Settings → Settings button shortcut** (opens Android's Accessibility settings), then turn on **Hearth Settings key**; or
-2. Over ADB: `adb shell settings put secure enabled_accessibility_services com.glasstv.launcher/com.glasstv.launcher.KeyService` and `adb shell settings put secure accessibility_enabled 1`.
+- it catches the button's key code (`KEYCODE_NOTIFICATION` on TCL remotes) before the app in front gets it, and opens or closes the sidebar;
+- if the TV launches its own Settings app instead (`KEYCODE_SETTINGS`), it closes that and opens the sidebar. Settings screens opened from Hearth's own buttons are left alone;
+- it reads no screen content, only which app's window opened and the one key.
 
-Without it, the **Menu** key still opens the sidebar on every TV, and the Settings key works as-is on TVs that pass it to the launcher.
+### Turn it on
+
+1. In the launcher: **Settings → Settings button shortcut** (opens Android's Accessibility settings), then turn on **Hearth Settings key** and accept the key-observation prompt.
+2. **After every update of the APK, switch it off and on once.** Android keeps it listed as enabled but stops running it when the app is replaced.
+
+### TCL and other TVs that block background apps
+
+TCL's firmware refuses to start accessibility services for apps without the "auto start" permission, so the toggle stays on **Off** and the log says `forbid bind service … OP_AUTO_START`. Allow it once from a computer, then switch the service off and on:
+
+```bash
+adb shell appops set com.glasstv.launcher APP_AUTO_START allow
+```
+
+Without the service, the **Menu** key and the in-launcher gear still open the sidebar on the home screen.
 
 ## Using it
 
@@ -131,7 +149,7 @@ Without it, the **Menu** key still opens the sidebar on every TV, and the Settin
 | --- | --- |
 | **D-pad** | Move between apps and settings |
 | **OK** | Open the selected app or setting |
-| **Settings** (or **Menu**) | Quick settings sidebar |
+| **Settings** (or **Menu**) | Quick settings sidebar. Press again to close it |
 | **Hold OK** on an app | App options: open, favorite, move, uninstall or disable, app info |
 | **Back** | Close a menu or go back to Home |
 | **Search / voice button** | Voice search |
@@ -225,8 +243,10 @@ glass-tv-launcher/
 │       │   ├── LauncherBridge.kt  ← app list, launch, uninstall, media sessions, settings shortcuts
 │       │   ├── IdleController.kt  ← music-aware idle detection and ambient screen-saver timing
 │       │   ├── Weather.kt         ← IP location + Open-Meteo hourly forecast
+│       │   ├── QuickSettingsActivity.kt ← see-through sidebar shown over other apps
+│       │   ├── JsHost.kt          ← lets the bridge talk to either web activity
 │       │   ├── MediaListener.kt   ← notification listener: media sessions and sidebar notifications
-│       │   └── KeyService.kt      ← accessibility service that catches the remote Settings key
+│       │   └── KeyService.kt      ← accessibility service that catches the remote's Settings button
 │       └── res/                   ← app icon, TV banner, theme, colours
 ├── build.gradle.kts · settings.gradle.kts · gradle/ · gradlew(.bat)
 └── README.md
@@ -243,6 +263,8 @@ The interface follows the Red Star Standard brand system: brand navy `#013480`, 
 - The APK is **debug-signed**, so it installs by sideloading only. To update, install the newer APK over it (`adb install -r`); it keeps your settings.
 - Android only exposes the item that is *currently active* in an app. The Continue Watching cards therefore remember the last thing the launcher saw. They cannot show a complete watch history, and opening a card opens the app, not the specific song or video.
 - **Netflix** (tested with 13.2.1 on Android TV) publishes a media session with a playback state but **no title or artwork**, and Android gives no app access to your Netflix account or its profiles (for example "blain"), so the launcher cannot read your watch history. Where the TV publishes a **Watch Next** row (Google TV home), the Netflix card shows the latest entry from it; otherwise it shows "Playing/Paused on Netflix" or "Recently played". Spotify and YouTube expose full metadata.
+- The sidebar over other apps is dimmed rather than blurred, because a see-through window cannot blur another app, and the app behind it is paused while it is open.
+- Keys injected over ADB (`adb shell input keyevent`) do not reach accessibility services, so the Settings-button shortcut can only be tested with the real remote.
 - The notification list shows only what other apps currently have posted, skips ongoing background-service notices, and needs Now playing access.
 - Glass blur can be heavy on budget TV hardware. If it feels slow, switch off **Settings → Glass effects**.
 - Weather needs an internet connection. IP-based location is approximate (usually the city), so pin `weather.lat`/`weather.lon` if the forecast is for the wrong place. No API key is needed.
