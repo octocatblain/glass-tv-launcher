@@ -7,4 +7,5 @@ string app_name
 string key_service_desc
 string key_service_label
 style Theme.GlassTV
+style Theme.GlassTV.Overlay
 xml key_service

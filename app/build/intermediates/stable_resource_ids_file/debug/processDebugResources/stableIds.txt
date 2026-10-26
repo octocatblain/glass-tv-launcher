@@ -1,4 +1,5 @@
 com.glasstv.launcher:xml/key_service = 0x7f050000
+com.glasstv.launcher:style/Theme.GlassTV.Overlay = 0x7f040001
 com.glasstv.launcher:style/Theme.GlassTV = 0x7f040000
 com.glasstv.launcher:string/key_service_label = 0x7f030002
 com.glasstv.launcher:string/key_service_desc = 0x7f030001

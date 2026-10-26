@@ -1,5 +1,6 @@
 package com.glasstv.launcher
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
@@ -23,7 +24,9 @@ import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 
 /** Methods the page can call as `Launcher.<name>(...)`. Everything returns strings/booleans. */
-class LauncherBridge(private val activity: MainActivity) {
+class LauncherBridge(private val activity: Activity) {
+
+    private val main get() = activity as? MainActivity
 
     private val pm get() = activity.packageManager
 
@@ -55,7 +58,7 @@ class LauncherBridge(private val activity: MainActivity) {
                     arr.put(o)
                 }
             }
-            activity.runJs("window.onApps(${JSONObject.quote(arr.toString())})")
+            (activity as? JsHost)?.runJs("window.onApps(${JSONObject.quote(arr.toString())})")
         }.start()
     }
 
@@ -227,19 +230,19 @@ class LauncherBridge(private val activity: MainActivity) {
     /** config.js idleMinutes: how long the launcher waits before letting the TV go idle. */
     @JavascriptInterface
     fun setIdleMinutes(minutes: Int) {
-        activity.setIdleMinutes(minutes)
+        main?.setIdleMinutes(minutes)
     }
 
     /** Settings > Screen saver. When off, idle lets the TV sleep instead of showing ambient mode. */
     @JavascriptInterface
     fun setScreenSaverEnabled(enabled: Boolean) {
-        activity.setScreenSaverEnabled(enabled)
+        main?.setScreenSaverEnabled(enabled)
     }
 
     /** Hourly weather for the home header; answers with window.onWeather(json). */
     @JavascriptInterface
     fun requestWeather(lat: String, lon: String, place: String, units: String) {
-        activity.requestWeather(lat, lon, place, units)
+        main?.requestWeather(lat, lon, place, units)
     }
 
     // ---- Now playing (reads other apps' media sessions) -------------------------------------
@@ -297,6 +300,27 @@ class LauncherBridge(private val activity: MainActivity) {
         val out = ByteArrayOutputStream()
         scaled.compress(Bitmap.CompressFormat.JPEG, 80, out)
         return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
+    }
+
+    // ---- Sidebar over other apps -----------------------------------------------------------
+
+    /** Closes the see-through sidebar (no-op inside the launcher itself). */
+    @JavascriptInterface
+    fun closeSidebar() {
+        if (activity is QuickSettingsActivity) activity.runOnUiThread { activity.finish() }
+    }
+
+    /** Brings the launcher to the front, optionally on a screen ("settings") or the "saver". */
+    @JavascriptInterface
+    fun openHearth(target: String) {
+        activity.runOnUiThread {
+            activity.startActivity(
+                Intent(activity, MainActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                    .putExtra(MainActivity.EXTRA_TARGET, target)
+            )
+            if (activity is QuickSettingsActivity) activity.finish()
+        }
     }
 
     // ---- Notifications (quick settings sidebar) ----------------------------------------------

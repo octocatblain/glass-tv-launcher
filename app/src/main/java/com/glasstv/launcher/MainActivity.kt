@@ -20,7 +20,7 @@ import android.webkit.WebViewClient
  * Android TV OS 12 compatible Home Launcher host activity.
  * Hearth: renders the UI in a hardware-accelerated WebView and handles TV remote keys.
  */
-class MainActivity : Activity() {
+class MainActivity : Activity(), JsHost {
 
     private lateinit var web: WebView
     private lateinit var idle: IdleController
@@ -123,7 +123,7 @@ class MainActivity : Activity() {
             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
     }
 
-        fun runJs(js: String) {
+        override fun runJs(js: String) {
         runOnUiThread {
             try {
                 web.evaluateJavascript(js, null)
@@ -168,9 +168,13 @@ class MainActivity : Activity() {
         if (intent.hasCategory(Intent.CATEGORY_HOME)) {
             runJs("window.goHome&&window.goHome()")
         }
+        intent.getStringExtra(EXTRA_TARGET)?.let { target ->
+            intent.removeExtra(EXTRA_TARGET)
+            runJs("window.openTarget&&window.openTarget(" + org.json.JSONObject.quote(target) + ")")
+        }
         if (intent.getBooleanExtra(EXTRA_QSET, false)) {
             intent.removeExtra(EXTRA_QSET)
-            runJs("window.openQset&&window.openQset()")
+            runJs("window.toggleQset&&window.toggleQset()")
         }
     }
 
@@ -194,6 +198,7 @@ class MainActivity : Activity() {
 
     companion object {
         const val EXTRA_QSET = "open_quick_settings"
+        const val EXTRA_TARGET = "open_target"
     }
 
     override fun onDestroy() {

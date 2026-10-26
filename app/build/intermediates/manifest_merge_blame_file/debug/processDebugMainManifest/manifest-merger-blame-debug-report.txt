@@ -61,7 +61,7 @@
 36    </queries>
 37
 38    <application
-38-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:32:5-91:19
+38-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:32:5-102:19
 39        android:allowBackup="false"
 39-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:33:9-36
 40        android:banner="@drawable/banner"
@@ -128,53 +128,73 @@
 72            </intent-filter>
 73        </activity>
 74
-75        <!--
-76             Needed only so the Now Playing screen can read active media sessions.
-77             Does nothing else; the user must grant Notification access.
-78        -->
-79        <service
-79-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:68:9-76:19
-80            android:name="com.glasstv.launcher.MediaListener"
-80-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:69:13-42
-81            android:exported="true"
-81-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:70:13-36
-82            android:label="@string/app_name"
-82-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:71:13-45
-83            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" >
-83-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:72:13-87
-84            <intent-filter>
-84-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:73:13-75:29
-85                <action android:name="android.service.notification.NotificationListenerService" />
-85-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:74:17-99
-85-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:74:25-96
-86            </intent-filter>
-87        </service>
-88
-89        <!-- Catches the remote's Settings key on TVs that handle it in firmware. -->
+75        <!-- The quick settings sidebar drawn over other apps (see-through, never in Recents). -->
+76        <activity
+76-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:67:9-75:60
+77            android:name="com.glasstv.launcher.QuickSettingsActivity"
+77-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:68:13-50
+78            android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation|uiMode|density|smallestScreenSize|screenLayout"
+78-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:69:13-141
+79            android:excludeFromRecents="true"
+79-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:70:13-46
+80            android:exported="false"
+80-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:71:13-37
+81            android:launchMode="singleTask"
+81-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:72:13-44
+82            android:noHistory="true"
+82-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:73:13-37
+83            android:taskAffinity="com.glasstv.launcher.sidebar"
+83-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:74:13-64
+84            android:theme="@style/Theme.GlassTV.Overlay" />
+84-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:75:13-57
+85
+86        <!--
+87             Needed only so the Now Playing screen can read active media sessions.
+88             Does nothing else; the user must grant Notification access.
+89        -->
 90        <service
-90-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:79:9-90:19
-91            android:name="com.glasstv.launcher.KeyService"
-91-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:80:13-39
+90-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:79:9-87:19
+91            android:name="com.glasstv.launcher.MediaListener"
+91-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:80:13-42
 92            android:exported="true"
 92-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:81:13-36
-93            android:label="@string/key_service_label"
-93-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:82:13-54
-94            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
-94-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:83:13-79
+93            android:label="@string/app_name"
+93-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:82:13-45
+94            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" >
+94-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:83:13-87
 95            <intent-filter>
 95-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:84:13-86:29
-96                <action android:name="android.accessibilityservice.AccessibilityService" />
-96-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:85:17-92
-96-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:85:25-89
+96                <action android:name="android.service.notification.NotificationListenerService" />
+96-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:85:17-99
+96-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:85:25-96
 97            </intent-filter>
-98
-99            <meta-data
-99-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:87:13-89:55
-100                android:name="android.accessibilityservice"
-100-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:88:17-60
-101                android:resource="@xml/key_service" />
-101-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:89:17-52
-102        </service>
-103    </application>
-104
-105</manifest>
+98        </service>
+99
+100        <!-- Catches the remote's Settings key on TVs that handle it in firmware. -->
+101        <service
+101-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:90:9-101:19
+102            android:name="com.glasstv.launcher.KeyService"
+102-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:91:13-39
+103            android:exported="true"
+103-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:92:13-36
+104            android:label="@string/key_service_label"
+104-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:93:13-54
+105            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+105-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:94:13-79
+106            <intent-filter>
+106-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:95:13-97:29
+107                <action android:name="android.accessibilityservice.AccessibilityService" />
+107-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:96:17-92
+107-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:96:25-89
+108            </intent-filter>
+109
+110            <meta-data
+110-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:98:13-100:55
+111                android:name="android.accessibilityservice"
+111-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:99:17-60
+112                android:resource="@xml/key_service" />
+112-->C:\Users\blain\OneDrive\Desktop\glass-tv-launcher\app\src\main\AndroidManifest.xml:100:17-52
+113        </service>
+114    </application>
+115
+116</manifest>

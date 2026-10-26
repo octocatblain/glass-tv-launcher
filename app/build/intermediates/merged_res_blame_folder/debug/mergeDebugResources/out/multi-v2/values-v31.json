@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.glasstv.launcher.app-mergeDebugResources-2:/values-v31/values-v31.xml",
+            "outputFile": "C:\\Users\\blain\\.gradle\\daemon\\9.6.0\\com.glasstv.launcher.app-mergeDebugResources-2:\\values-v31\\values-v31.xml",
             "map": [
                 {
                     "source": "C:\\Users\\blain\\OneDrive\\Desktop\\glass-tv-launcher\\app\\src\\main\\res\\values-v31\\themes.xml",
@@ -20,6 +20,30 @@
                         "endLines": "9",
                         "endColumns": "12",
                         "endOffsets": "556"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "com.glasstv.launcher.app-mergeDebugResources-2:/values-v31/values-v31.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\blain\\OneDrive\\Desktop\\glass-tv-launcher\\app\\src\\main\\res\\values-v31\\themes.xml",
+                    "from": {
+                        "startLines": "-1,10",
+                        "startColumns": "-1,4",
+                        "startOffsets": "-1,571",
+                        "endLines": "-1,16",
+                        "endColumns": "-1,12",
+                        "endOffsets": "-1,999"
+                    },
+                    "to": {
+                        "startLines": "2,10",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,561",
+                        "endLines": "9,16",
+                        "endColumns": "12,12",
+                        "endOffsets": "556,983"
                     }
                 }
             ]

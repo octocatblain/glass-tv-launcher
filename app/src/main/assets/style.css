@@ -244,3 +244,8 @@ body.flat .sheet{background:var(--surface)}
 .saver-hint{letter-spacing:.08em}
 @keyframes saverFloat{from{transform:translateY(-6px)}to{transform:translateY(6px)}}
 @keyframes saverDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(44px,30px,0)}}
+
+/* ---------- sidebar-only mode: the see-through activity shown over other apps ---------- */
+html:has(body.qset-only),body.qset-only{background:transparent}
+body.qset-only .orb,body.qset-only .screen,body.qset-only #saver,body.qset-only #sheet{display:none!important}
+body.qset-only .qset-back{background:rgba(3,6,14,.38);-webkit-backdrop-filter:none;backdrop-filter:none}

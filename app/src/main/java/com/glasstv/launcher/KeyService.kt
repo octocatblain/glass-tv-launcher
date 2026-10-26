@@ -24,6 +24,7 @@ class KeyService : AccessibilityService() {
         val pkg = event.packageName?.toString() ?: return
         // Volume bars, keyboards and the like pop over apps; they must not count as leaving one.
         if (pkg == "com.android.systemui" || pkg.contains("inputmethod")) return
+        if (event.className?.toString()?.endsWith("QuickSettingsActivity") == true) return
         val prev = lastPkg
         lastPkg = pkg
         Log.d(TAG, "window $pkg / ${event.className} (from $prev)")
@@ -32,14 +33,10 @@ class KeyService : AccessibilityService() {
         // Hearth's own "All settings" and shortcut buttons open Settings too; leave those alone.
         if (now - lastOwnOpen < 5000 || now - lastHandled < 1500) return
         lastHandled = now
+        // The app that was underneath is where the sidebar belongs, so remember it for openSidebar().
+        lastPkg = prev
         performGlobalAction(GLOBAL_ACTION_BACK)
-        handler.postDelayed({
-            startActivity(
-                Intent(this, MainActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                    .putExtra(MainActivity.EXTRA_QSET, true)
-            )
-        }, 250)
+        handler.postDelayed({ openSidebar() }, 250)
     }
 
     /**
@@ -53,10 +50,20 @@ class KeyService : AccessibilityService() {
         return true
     }
 
+    /**
+     * Opens or closes the sidebar. Inside Hearth the page shows it; over any other app a see-through
+     * activity shows it so that app stays visible behind it. A second press closes it either way.
+     */
     private fun openSidebar() {
         lastHandled = System.currentTimeMillis()
+        val overlay = QuickSettingsActivity.instance
+        if (overlay != null) {
+            overlay.runOnUiThread { overlay.finish() }
+            return
+        }
+        val target = if (lastPkg == packageName) MainActivity::class.java else QuickSettingsActivity::class.java
         startActivity(
-            Intent(this, MainActivity::class.java)
+            Intent(this, target)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 .putExtra(MainActivity.EXTRA_QSET, true)
         )

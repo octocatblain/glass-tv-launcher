@@ -63,6 +63,17 @@
             </intent-filter>
         </activity>
 
+        <!-- The quick settings sidebar drawn over other apps (see-through, never in Recents). -->
+        <activity
+            android:name=".QuickSettingsActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation|uiMode|density|smallestScreenSize|screenLayout"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:taskAffinity="com.glasstv.launcher.sidebar"
+            android:theme="@style/Theme.GlassTV.Overlay" />
+
         <!-- Needed only so the Now Playing screen can read active media sessions.
              Does nothing else; the user must grant Notification access. -->
         <service

@@ -5,4 +5,5 @@ int string app_name 0x7f030000
 int string key_service_desc 0x7f030001
 int string key_service_label 0x7f030002
 int style Theme_GlassTV 0x7f040000
+int style Theme_GlassTV_Overlay 0x7f040001
 int xml key_service 0x7f050000

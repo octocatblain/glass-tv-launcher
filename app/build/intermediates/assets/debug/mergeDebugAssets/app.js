@@ -514,7 +514,14 @@
     focusEl($('.qset-tile', el));
   }
   window.openQset = openQset;
-  function closeQset() { $('#qset').hidden = true; }
+  const OVERLAY = location.hash === '#qset';
+  function closeQset() {
+    $('#qset').hidden = true;
+    if (OVERLAY) { try { Native.closeSidebar(); } catch (e) { /* preview */ } }
+  }
+  window.toggleQset = () => { if (qsetOpen()) closeQset(); else openQset(); };
+  // Targets other activities ask the launcher to show (sidebar tiles pressed over another app).
+  window.openTarget = (t) => { if (t === 'saver') showSaver(); else if (t) { closeQset(); show(t); } };
 
   window.onMenu = () => {
     if (saverVisible) { hideSaver(); return true; }
@@ -525,12 +532,12 @@
 
   function onBack() {
     if (saverVisible) { hideSaver(); return; }
-    if (qsetOpen()) { $('#qset').hidden = true; return; }
+    if (qsetOpen()) { closeQset(); return; }
     if (sheetOpen()) { closeSheet(); return; }
     if (screen !== 'home') show('home');
   }
   window.onBack = onBack;
-  window.goHome = () => { if (saverVisible) { hideSaver(); return; } if (qsetOpen()) { $('#qset').hidden = true; return; } show('home'); };
+  window.goHome = () => { if (saverVisible) { hideSaver(); return; } if (qsetOpen()) { closeQset(); return; } show('home'); };
   window.onVoiceSearch = () => {
     if (saverVisible) { hideSaver(); return; }
     Native.openVoiceSearch();
@@ -610,6 +617,8 @@
     // The key-up that ends a long press must not also trigger the button that now has focus.
     if (Date.now() - sheetOpenedAt < 600) return;
     const d = b.dataset;
+    if (OVERLAY && d.action === 'screen') { Native.openHearth(d.to); return; }
+    if (OVERLAY && d.action === 'qsetSaver') { Native.openHearth('saver'); return; }
     switch (d.action) {
       case 'manage': openSheet(d.pkg); break;
       case 'fav': {
@@ -647,11 +656,11 @@
         break;
       }
       case 'qsetSaver':
-        $('#qset').hidden = true;
+        closeQset();
         showSaver();
         break;
       case 'qsetSystem':
-        $('#qset').hidden = true;
+        closeQset();
         Native.openSystem(d.kind);
         break;
       case 'system': Native.openSystem(d.kind); break;
@@ -991,6 +1000,11 @@
 
   applySettings();
   show('home');
+  if (OVERLAY) {
+    document.body.classList.add('qset-only');
+    openQset();
+    return;
+  }
   if (location.hash === '#saver') showSaver();
   const idleMinutes = Math.round(Number(C.idleMinutes));
   if (Native.setIdleMinutes) Native.setIdleMinutes(idleMinutes > 0 ? idleMinutes : 15);
