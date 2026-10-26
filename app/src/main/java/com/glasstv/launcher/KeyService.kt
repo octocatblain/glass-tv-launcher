@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 
 /**
@@ -39,6 +40,26 @@ class KeyService : AccessibilityService() {
                     .putExtra(MainActivity.EXTRA_QSET, true)
             )
         }, 250)
+    }
+
+    /**
+     * TCL remotes send the Settings button as KEYCODE_NOTIFICATION.
+     * Inside other apps nothing on the TV reacts to it, so take it here and open the sidebar.
+     */
+    override fun onKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode != KeyEvent.KEYCODE_NOTIFICATION) return false
+        Log.d(TAG, "key ${event.keyCode} action ${event.action}")
+        if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) openSidebar()
+        return true
+    }
+
+    private fun openSidebar() {
+        lastHandled = System.currentTimeMillis()
+        startActivity(
+            Intent(this, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                .putExtra(MainActivity.EXTRA_QSET, true)
+        )
     }
 
     override fun onInterrupt() {}

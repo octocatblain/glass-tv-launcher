@@ -180,7 +180,7 @@ class MainActivity : Activity() {
                 runJs("window.onBack&&window.onBack()")
                 return true
             }
-            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_SETTINGS -> {
+            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_SETTINGS, KeyEvent.KEYCODE_NOTIFICATION -> {
                 runJs("window.onMenu&&window.onMenu()")
                 return true
             }
